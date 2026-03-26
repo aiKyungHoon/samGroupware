@@ -1,19 +1,21 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ArrowDown, Network, Users, X, Save, Pencil } from 'lucide-react';
+import { db } from '../firebase';
+import { ref, onValue, set } from 'firebase/database';
 
 /* ─────────── Types ─────────── */
 type NamedRole = { role: string; name: string };
 type TeamData = { name: string; leader: string; count: number; color: string; bgColor: string; areas: string[] };
 
-/* ─────────── Initial Data ─────────── */
-const initJeondo: NamedRole[] = [
+/* ─────────── Default Data (used when DB is empty) ─────────── */
+const defaultJeondo: NamedRole[] = [
   { role: '지역장', name: '김하영' },
   { role: '전도교관', name: '박다솔' },
   { role: '전도서기', name: '김선우B' },
   { role: '대외협력교관', name: '양재준' },
 ];
 
-const initNalgae: NamedRole[] = [
+const defaultNalgae: NamedRole[] = [
   { role: '지역서기', name: '복서경' },
   { role: '교육팀장', name: '김성준' },
   { role: '문화팀장', name: '이여진' },
@@ -21,7 +23,7 @@ const initNalgae: NamedRole[] = [
   { role: '심방팀장', name: '박미연' },
 ];
 
-const initTeams: TeamData[] = [
+const defaultTeams: TeamData[] = [
   { name: '보라팀', leader: '김규리', count: 50, color: '#8b5cf6', bgColor: '#f3e8ff', areas: ['1구역', '2구역', '3구역', '4구역', '5구역'] },
   { name: '이음팀', leader: '김주영a', count: 55, color: '#3b82f6', bgColor: '#dbeafe', areas: ['6구역', '7구역', '8구역', '9구역', '10구역'] },
   { name: '해봄팀', leader: '김반디', count: 45, color: '#f59e0b', bgColor: '#fef3c7', areas: ['11구역', '12구역', '13구역', '14구역', '15구역'] },
@@ -41,7 +43,7 @@ function Modal({ title, subtitle, onClose, onSave, children }: {
             <p style={{ fontSize: '12px', color: '#6b7280', marginTop: '2px' }}>{subtitle}</p>
           </div>
           <button onClick={onClose} style={{ background: '#f3f4f6', border: 'none', borderRadius: '10px', padding: '8px', cursor: 'pointer', display: 'flex' }}>
-            <X size={18} color="var(--on-surface)" />
+            <X size={18} color="#374151" />
           </button>
         </div>
         {/* Body */}
@@ -60,10 +62,10 @@ function Modal({ title, subtitle, onClose, onSave, children }: {
 
 const inputStyle: React.CSSProperties = {
   width: '100%', padding: '8px 12px', borderRadius: 'var(--radius-md)',
-  border: '1.5px solid var(--outline-variant)', background: 'var(--surface)',
-  fontSize: '14px', fontWeight: 600, boxSizing: 'border-box', color: 'var(--on-surface)',
+  border: '1.5px solid #d1d5db', background: '#ffffff',
+  fontSize: '14px', fontWeight: 600, boxSizing: 'border-box', color: '#111827',
 };
-const labelStyle: React.CSSProperties = { display: 'block', fontSize: '12px', color: 'var(--secondary)', fontWeight: 600, marginBottom: '4px' };
+const labelStyle: React.CSSProperties = { display: 'block', fontSize: '12px', color: '#6b7280', fontWeight: 600, marginBottom: '4px' };
 
 function EditBtn({ onClick }: { onClick: () => void }) {
   return (
@@ -78,18 +80,40 @@ function EditBtn({ onClick }: { onClick: () => void }) {
 
 /* ─────────── Main Component ─────────── */
 export function OrgChart() {
-  // State: data
-  const [jeondo, setJeondo] = useState<NamedRole[]>(initJeondo);
-  const [nalgae, setNalgae] = useState<NamedRole[]>(initNalgae);
-  const [teams, setTeams] = useState<TeamData[]>(initTeams);
+  const [jeondo, setJeondo] = useState<NamedRole[]>(defaultJeondo);
+  const [nalgae, setNalgae] = useState<NamedRole[]>(defaultNalgae);
+  const [teams, setTeams] = useState<TeamData[]>(defaultTeams);
+  const [loading, setLoading] = useState(true);
 
-  // State: modal open flags
   const [modal, setModal] = useState<'jeondo' | 'nalgae' | 'teams' | null>(null);
-
-  // State: edit buffers
   const [editJeondo, setEditJeondo] = useState<NamedRole[]>([]);
   const [editNalgae, setEditNalgae] = useState<NamedRole[]>([]);
   const [editTeams, setEditTeams] = useState<TeamData[]>([]);
+
+  /* ─── Firebase: Load on mount ─── */
+  useEffect(() => {
+    const jeondoRef = ref(db, 'orgchart/jeondo');
+    const nalgaeRef = ref(db, 'orgchart/nalgae');
+    const teamsRef = ref(db, 'orgchart/teams');
+
+    let loaded = 0;
+    const markLoaded = () => { loaded++; if (loaded === 3) setLoading(false); };
+
+    const unsub1 = onValue(jeondoRef, snap => {
+      if (snap.exists()) setJeondo(snap.val());
+      markLoaded();
+    });
+    const unsub2 = onValue(nalgaeRef, snap => {
+      if (snap.exists()) setNalgae(snap.val());
+      markLoaded();
+    });
+    const unsub3 = onValue(teamsRef, snap => {
+      if (snap.exists()) setTeams(snap.val());
+      markLoaded();
+    });
+
+    return () => { unsub1(); unsub2(); unsub3(); };
+  }, []);
 
   const totalMembers = teams.reduce((acc, t) => acc + t.count, 0);
 
@@ -99,12 +123,22 @@ export function OrgChart() {
     if (which === 'teams') setEditTeams(teams.map(t => ({ ...t, areas: [...t.areas] })));
     setModal(which);
   };
-
   const close = () => setModal(null);
 
-  const saveJeondo = () => { setJeondo(editJeondo); close(); };
-  const saveNalgae = () => { setNalgae(editNalgae); close(); };
-  const saveTeams = () => { setTeams(editTeams); close(); };
+  /* ─── Firebase: Save ─── */
+  const saveJeondo = async () => { await set(ref(db, 'orgchart/jeondo'), editJeondo); close(); };
+  const saveNalgae = async () => { await set(ref(db, 'orgchart/nalgae'), editNalgae); close(); };
+  const saveTeams = async () => { await set(ref(db, 'orgchart/teams'), editTeams); close(); };
+
+  if (loading) {
+    return (
+      <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: '16px', color: 'var(--secondary)' }}>
+        <div style={{ width: '40px', height: '40px', border: '3px solid var(--outline-variant)', borderTop: '3px solid var(--primary)', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+        <p style={{ fontSize: '14px', fontWeight: 600 }}>조직도를 불러오는 중...</p>
+        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+      </div>
+    );
+  }
 
   return (
     <div style={{ padding: '32px', flex: 1, overflowY: 'auto' }}>
@@ -116,7 +150,6 @@ export function OrgChart() {
       </header>
 
       <div style={{ maxWidth: '1000px', margin: '0 auto', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-
         {/* Top 3-column row */}
         <div className="responsive-grid-3" style={{ width: '100%', alignItems: 'start', marginBottom: '16px' }}>
 
@@ -136,7 +169,7 @@ export function OrgChart() {
             </ul>
           </div>
 
-          {/* 임원 (Center) */}
+          {/* 임원 */}
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
             <div style={{ background: 'linear-gradient(135deg, var(--on-surface), #3e4c59)', color: 'white', padding: '24px 48px', borderRadius: 'var(--radius-lg)', textAlign: 'center', boxShadow: 'var(--shadow-ambient)' }}>
               <div style={{ fontSize: '15px', opacity: 0.9, marginBottom: '6px' }}>임원</div>
@@ -229,7 +262,7 @@ export function OrgChart() {
         <Modal title="양때 팀장 명단 수정" subtitle="팀 이름, 팀장, 인원 수, 구역명을 수정합니다." onClose={close} onSave={saveTeams}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
             {editTeams.map((team, tIdx) => (
-              <div key={tIdx} style={{ border: `2px solid ${team.color}`, borderRadius: 'var(--radius-lg)', padding: '18px', background: 'var(--surface-lowest)' }}>
+              <div key={tIdx} style={{ border: `2px solid ${team.color}`, borderRadius: 'var(--radius-lg)', padding: '18px', background: '#fff' }}>
                 <div style={{ display: 'inline-block', background: team.bgColor, color: team.color, padding: '4px 14px', borderRadius: 'var(--radius-full)', fontSize: '13px', fontWeight: 700, marginBottom: '14px' }}>
                   {team.name}
                 </div>
