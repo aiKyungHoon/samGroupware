@@ -32,23 +32,23 @@ function Modal({ title, subtitle, onClose, onSave, children }: {
   title: string; subtitle: string; onClose: () => void; onSave: () => void; children: React.ReactNode;
 }) {
   return (
-    <div onClick={onClose} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px' }}>
-      <div onClick={e => e.stopPropagation()} style={{ background: 'var(--surface)', borderRadius: 'var(--radius-lg)', width: '100%', maxWidth: '560px', maxHeight: '85vh', overflowY: 'auto', boxShadow: '0 24px 64px rgba(0,0,0,0.3)' }}>
+    <div onClick={onClose} style={{ position: 'fixed', inset: 0, background: 'rgba(15,20,40,0.82)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px' }}>
+      <div onClick={e => e.stopPropagation()} style={{ background: '#ffffff', borderRadius: 'var(--radius-lg)', width: '100%', maxWidth: '560px', maxHeight: '85vh', overflowY: 'auto', boxShadow: '0 32px 80px rgba(0,0,0,0.5)' }}>
         {/* Header */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '20px 24px', borderBottom: '1px solid var(--outline-variant)', position: 'sticky', top: 0, background: 'var(--surface)', zIndex: 1 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '20px 24px', borderBottom: '1px solid #e8ecf0', position: 'sticky', top: 0, background: '#ffffff', zIndex: 1 }}>
           <div>
-            <h2 style={{ fontSize: '18px', fontWeight: 800, color: 'var(--on-surface)' }}>{title}</h2>
-            <p style={{ fontSize: '12px', color: 'var(--secondary)', marginTop: '2px' }}>{subtitle}</p>
+            <h2 style={{ fontSize: '18px', fontWeight: 800, color: '#111827' }}>{title}</h2>
+            <p style={{ fontSize: '12px', color: '#6b7280', marginTop: '2px' }}>{subtitle}</p>
           </div>
-          <button onClick={onClose} style={{ background: 'var(--surface-low)', border: 'none', borderRadius: 'var(--radius-md)', padding: '8px', cursor: 'pointer', display: 'flex' }}>
+          <button onClick={onClose} style={{ background: '#f3f4f6', border: 'none', borderRadius: '10px', padding: '8px', cursor: 'pointer', display: 'flex' }}>
             <X size={18} color="var(--on-surface)" />
           </button>
         </div>
         {/* Body */}
-        <div style={{ padding: '20px 24px' }}>{children}</div>
+        <div style={{ padding: '20px 24px', background: '#f9fafb' }}>{children}</div>
         {/* Footer */}
-        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', padding: '14px 24px', borderTop: '1px solid var(--outline-variant)', position: 'sticky', bottom: 0, background: 'var(--surface)' }}>
-          <button onClick={onClose} style={{ padding: '9px 20px', background: 'var(--surface-low)', color: 'var(--on-surface)', border: 'none', borderRadius: 'var(--radius-md)', fontWeight: 600, cursor: 'pointer', fontSize: '14px' }}>취소</button>
+        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', padding: '14px 24px', borderTop: '1px solid #e8ecf0', position: 'sticky', bottom: 0, background: '#ffffff' }}>
+          <button onClick={onClose} style={{ padding: '9px 20px', background: '#f3f4f6', color: '#374151', border: 'none', borderRadius: 'var(--radius-md)', fontWeight: 600, cursor: 'pointer', fontSize: '14px' }}>취소</button>
           <button onClick={onSave} style={{ padding: '9px 20px', background: 'var(--primary)', color: 'white', border: 'none', borderRadius: 'var(--radius-md)', fontWeight: 600, cursor: 'pointer', fontSize: '14px', display: 'flex', alignItems: 'center', gap: '6px' }}>
             <Save size={15} /> 저장하기
           </button>
