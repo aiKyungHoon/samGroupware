@@ -10,18 +10,18 @@ const menuItems = [
   { id: 'visits', name: '심방 관리', icon: HeartHandshake },
 ];
 
-export function Sidebar({ 
-  activeTab, 
-  onTabChange 
-}: { 
-  activeTab: string, 
+export function Sidebar({
+  activeTab,
+  onTabChange
+}: {
+  activeTab: string,
   onTabChange: (id: string) => void
 }) {
   return (
-    <aside style={{ 
-      width: '280px', 
-      height: '100%', 
-      background: 'white', 
+    <aside style={{
+      width: '280px',
+      height: '100%',
+      background: 'white',
       borderRight: '1px solid var(--outline-variant)',
       display: 'flex',
       flexDirection: 'column',
@@ -36,7 +36,7 @@ export function Sidebar({
         fontFamily: 'Inter, sans-serif',
         letterSpacing: '-0.02em'
       }}>
-        상암지역 <br /><span style={{ fontSize: '14px', color: 'var(--secondary)', fontWeight: 500 }}>생추어리 관리자</span>
+        상암지역 <br /><span style={{ fontSize: '14px', color: 'var(--secondary)', fontWeight: 500 }}>춘식 관리자</span>
       </div>
 
       <nav style={{ display: 'flex', flexDirection: 'column', gap: '8px', flex: 1 }}>

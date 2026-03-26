@@ -37,43 +37,43 @@ function App() {
   return (
     <div style={{ display: 'flex', height: '100vh', background: 'var(--surface-lowest)', color: 'var(--on-surface)', overflow: 'hidden' }}>
       {/* Sidebar - Desktop and Mobile */}
-      <div 
+      <div
         className={`app-sidebar ${isSidebarOpen ? 'open' : ''}`}
-        style={{ 
+        style={{
           display: 'block' // Allow CSS media queries to handle width/position
         }}
       >
-        <Sidebar 
-          activeTab={activeTab} 
+        <Sidebar
+          activeTab={activeTab}
           onTabChange={(id) => {
             setActiveTab(id);
             if (window.innerWidth <= 768) setIsSidebarOpen(false); // Close on mobile after selection
-          }} 
+          }}
         />
       </div>
 
       {/* Mobile Overlay */}
       {isSidebarOpen && (
-        <div 
-          className="sidebar-overlay open" 
+        <div
+          className="sidebar-overlay open"
           onClick={() => setIsSidebarOpen(false)}
         />
       )}
 
       <main style={{ flex: 1, display: 'flex', flexDirection: 'column', position: 'relative' }}>
         {/* Top Header for Mobile & Desktop Toggle */}
-        <header style={{ 
-          height: '64px', 
-          borderBottom: '1px solid var(--outline-variant)', 
-          display: 'flex', 
-          alignItems: 'center', 
+        <header style={{
+          height: '64px',
+          borderBottom: '1px solid var(--outline-variant)',
+          display: 'flex',
+          alignItems: 'center',
           justifyContent: 'space-between',
           padding: '0 24px',
           background: 'white',
           zIndex: 10
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-            <button 
+            <button
               onClick={() => setIsSidebarOpen(!isSidebarOpen)}
               style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '8px', color: 'var(--on-surface)' }}
             >
@@ -81,7 +81,7 @@ function App() {
             </button>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <Users size={20} color="var(--primary)" />
-              <span style={{ fontWeight: 800, fontSize: '18px', letterSpacing: '-0.02em' }}>Sanctuary <span style={{ fontWeight: 400, color: 'var(--secondary)' }}>Groupware</span></span>
+              <span style={{ fontWeight: 800, fontSize: '18px', letterSpacing: '-0.02em' }}>상암 <span style={{ fontWeight: 400, color: 'var(--secondary)' }}>Groupware</span></span>
             </div>
           </div>
         </header>
@@ -89,13 +89,13 @@ function App() {
         {renderContent()}
 
         {/* Mobile Bottom Navigation */}
-        <nav className="mobile-only" style={{ 
-          position: 'fixed', 
-          bottom: 0, 
-          left: 0, 
-          right: 0, 
-          height: '72px', 
-          background: 'rgba(255, 255, 255, 0.9)', 
+        <nav className="mobile-only" style={{
+          position: 'fixed',
+          bottom: 0,
+          left: 0,
+          right: 0,
+          height: '72px',
+          background: 'rgba(255, 255, 255, 0.9)',
           backdropFilter: 'blur(10px)',
           borderTop: '1px solid var(--outline-variant)',
           display: 'flex',
