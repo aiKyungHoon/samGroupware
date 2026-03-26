@@ -1,0 +1,231 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Manrope:wght@500;700;800&display=swap');
+
+:root {
+  --background: #f7f9fb;
+  --surface-low: #f2f4f6;
+  --surface-lowest: #ffffff;
+  --surface-high: #e6e8ea;
+  
+  --primary: #00288e;
+  --primary-container: #1e40af;
+  --on-primary: #ffffff;
+  
+  --secondary: #516070;
+  --secondary-container: #d5e4f8;
+  --on-secondary-container: #576676;
+  --on-primary-fixed-variant: #173bab;
+  
+  --on-surface: #191c1e;
+  --tertiary: #611e00;
+  --outline-variant: #c4c5d5;
+  
+  --font-display: 'Manrope', sans-serif;
+  --font-body: 'Inter', sans-serif;
+  
+  --radius-md: 0.5rem;
+  --radius-lg: 1rem;
+  --radius-full: 9999px;
+  
+  /* Ambient Soft Shadows */
+  --shadow-ambient: 0 12px 32px -4px rgba(0, 40, 142, 0.06);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-body);
+  background-color: var(--background);
+  color: var(--on-surface);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-display);
+  letter-spacing: -0.02em;
+  font-weight: 700;
+}
+
+ul {
+  list-style: none;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+/* Responsive Layout Utilities */
+.app-layout {
+  display: flex;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.app-sidebar {
+  width: 280px;
+  height: 100%;
+  background-color: var(--surface-low);
+  border-right: 1px solid var(--surface-high);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 150;
+  flex-shrink: 0;
+}
+
+.app-main {
+  flex: 1;
+  height: 100%;
+  background: var(--background);
+  overflow-y: auto;
+  position: relative;
+}
+
+.responsive-grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+
+.responsive-grid-3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+}
+
+.responsive-flex {
+  display: flex;
+  gap: 24px;
+}
+
+/* Mobile Hamburger & Header elements */
+.mobile-header {
+  display: none;
+  padding: 16px 24px;
+  background: var(--surface-lowest);
+  border-bottom: 1px solid var(--surface-high);
+  align-items: center;
+  justify-content: space-between;
+}
+
+.hamburger-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: var(--primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sidebar-overlay {
+  display: none;
+}
+
+/* Base styles for bottom nav - hidden on desktop */
+.mobile-bottom-nav {
+  display: none;
+  background: var(--surface-lowest);
+  border-top: 1px solid var(--surface-high);
+  padding: 10px 16px;
+  justify-content: space-around;
+  align-items: center;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 50;
+  padding-bottom: calc(10px + env(safe-area-inset-bottom));
+}
+
+.mobile-nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  color: var(--secondary);
+  background: none;
+  border: none;
+  font-size: 11px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.mobile-nav-item.active {
+  color: var(--primary);
+  font-weight: 700;
+}
+
+.mobile-nav-item.active svg {
+  color: var(--primary);
+}
+
+/* Media Queries MUST be at the end to override base styles properly! */
+@media (max-width: 768px) {
+  .app-layout {
+    flex-direction: column;
+  }
+  
+  .mobile-header {
+    display: flex;
+  }
+
+  .app-sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    transform: translateX(-100%);
+  }
+  
+  .app-sidebar.open {
+    transform: translateX(0);
+  }
+
+  .responsive-grid-2, .responsive-grid-3 {
+    grid-template-columns: 1fr;
+  }
+  
+  .responsive-flex {
+    flex-direction: column;
+  }
+  
+  h1 {
+    font-size: 22px !important;
+  }
+
+  .sidebar-overlay.open {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.4);
+    z-index: 90;
+  }
+
+  /* Show bottom nav on mobile */
+  .mobile-bottom-nav {
+    display: flex;
+  }
+
+  /* Add padding to bottom of main content so it's not hidden behind the fixed footer */
+  .app-main {
+    padding-bottom: 74px;
+  }
+}
+/* Responsive visibility helpers */
+.mobile-only {
+  display: none !important;
+}
+
+@media (max-width: 768px) {
+  .mobile-only {
+    display: flex !important;
+  }
+  .desktop-only {
+    display: none !important;
+  }
+}

@@ -1,0 +1,268 @@
+import React, { useState } from 'react';
+import { LogIn, UserPlus, ShieldCheck } from 'lucide-react';
+import { auth, db } from '../../firebase';
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
+import { ref, set, get } from 'firebase/database';
+
+interface AuthProps {
+  onLoginSuccess: (user: any) => void;
+}
+
+export function Auth({ onLoginSuccess }: AuthProps) {
+  const [isLogin, setIsLogin] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  // Form states
+  const [id, setId] = useState('');
+  const [password, setPassword] = useState('');
+  const [name, setName] = useState('');
+  const [department, setDepartment] = useState('');
+
+  const departments = [
+    '임원', '지역장', '지역서기', '전도교관', '심방팀장', '문화팀장', '교육팀장', '회계팀장', 
+    '양때팀장', '구역장', '팀서기', '교육서기', '회계서기', '심방서기', '부구역장'
+  ];
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError('');
+    
+    try {
+      // Logic: id + "@churchware.app" for Firebase Auth
+      const email = `${id}@churchware.app`;
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      
+      // Fetch user profile from RTDB
+      const userRef = ref(db, `users/${userCredential.user.uid}`);
+      const snapshot = await get(userRef);
+      
+      if (snapshot.exists()) {
+        const userData = snapshot.val();
+        if (!userData.isApproved) {
+          setError('아직 사역 승인 대기 중입니다. 관리자에게 문의하세요.');
+          await auth.signOut();
+          setLoading(false);
+          return;
+        }
+        onLoginSuccess(userData);
+      } else {
+        setError('사용자 프로필을 찾을 수 없습니다.');
+        await auth.signOut();
+      }
+    } catch (err: any) {
+      setError('아이디 또는 비밀번호가 올바르지 않습니다.');
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSignup = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError('');
+
+    try {
+      const email = `${id}@churchware.app`;
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      
+      // Create user profile in RTDB
+      await set(ref(db, `users/${userCredential.user.uid}`), {
+        uid: userCredential.user.uid,
+        id,
+        name,
+        department,
+        isApproved: false,
+        role: 'user', // Default role
+        createdAt: new Date().toISOString()
+      });
+
+      alert('가입 신청이 완료되었습니다! 관리자 승인 후 이용 가능합니다.');
+      setIsLogin(true);
+    } catch (err: any) {
+      if (err.code === 'auth/email-already-in-use') {
+        setError('이미 존재하는 아이디입니다.');
+      } else {
+        setError('가입 도중 오류가 발생했습니다.');
+      }
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div style={{ 
+      minHeight: '100vh', 
+      display: 'flex', 
+      alignItems: 'center', 
+      justifyContent: 'center', 
+      background: 'var(--surface-lowest)',
+      padding: '24px'
+    }}>
+      <div style={{ 
+        width: '100%', 
+        maxWidth: '400px', 
+        background: 'white', 
+        padding: '40px', 
+        borderRadius: 'var(--radius-xl)', 
+        boxShadow: 'var(--shadow-elevated)',
+        textAlign: 'center'
+      }}>
+        <div style={{ 
+          width: '64px', 
+          height: '64px', 
+          background: 'var(--primary-container)', 
+          borderRadius: 'var(--radius-lg)', 
+          display: 'flex', 
+          alignItems: 'center', 
+          justifyContent: 'center', 
+          margin: '0 auto 24px'
+        }}>
+          <ShieldCheck size={32} color="var(--primary)" />
+        </div>
+
+        <h1 style={{ fontSize: '24px', fontWeight: 800, marginBottom: '8px' }}>
+          {isLogin ? '그루웨어 로그인' : '사역 신청 (회원가입)'}
+        </h1>
+        <p style={{ color: 'var(--secondary)', marginBottom: '32px', fontSize: '14px' }}>
+          {isLogin ? '상암지역 통합 관리 시스템' : '정보를 입력하여 가입을 신청하세요'}
+        </p>
+
+        {error && (
+          <div style={{ 
+            background: '#fee2e2', 
+            color: '#b91c1c', 
+            padding: '12px', 
+            borderRadius: 'var(--radius-md)', 
+            marginBottom: '20px', 
+            fontSize: '14px' 
+          }}>
+            {error}
+          </div>
+        )}
+
+        <form onSubmit={isLogin ? handleLogin : handleSignup} style={{ textAlign: 'left' }}>
+          <div style={{ marginBottom: '20px' }}>
+            <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, color: 'var(--secondary)', marginBottom: '6px' }}>아이디 (ID)</label>
+            <input 
+              required
+              type="text" 
+              value={id}
+              onChange={(e) => setId(e.target.value)}
+              placeholder="아이디를 입력하세요" 
+              style={{ 
+                width: '100%', 
+                padding: '12px 16px', 
+                borderRadius: 'var(--radius-md)', 
+                border: '1px solid var(--outline-variant)',
+                outline: 'none'
+              }} 
+            />
+          </div>
+
+          {!isLogin && (
+            <>
+              <div style={{ marginBottom: '20px' }}>
+                <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, color: 'var(--secondary)', marginBottom: '6px' }}>이름</label>
+                <input 
+                  required
+                  type="text" 
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="본명을 입력하세요" 
+                  style={{ 
+                    width: '100%', 
+                    padding: '12px 16px', 
+                    borderRadius: 'var(--radius-md)', 
+                    border: '1px solid var(--outline-variant)',
+                    outline: 'none'
+                  }} 
+                />
+              </div>
+              <div style={{ marginBottom: '20px' }}>
+                <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, color: 'var(--secondary)', marginBottom: '6px' }}>부서명</label>
+                <select 
+                  required
+                  value={department}
+                  onChange={(e) => setDepartment(e.target.value)}
+                  style={{ 
+                    width: '100%', 
+                    padding: '12px 16px', 
+                    borderRadius: 'var(--radius-md)', 
+                    border: '1px solid var(--outline-variant)',
+                    background: 'white',
+                    outline: 'none'
+                  }}
+                >
+                  <option value="">부서를 선택하세요</option>
+                  {departments.map(dept => <option key={dept} value={dept}>{dept}</option>)}
+                </select>
+              </div>
+            </>
+          )}
+
+          <div style={{ marginBottom: '32px' }}>
+            <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, color: 'var(--secondary)', marginBottom: '6px' }}>비밀번호</label>
+            <input 
+              required
+              type="password" 
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="비밀번호를 입력하세요" 
+              style={{ 
+                width: '100%', 
+                padding: '12px 16px', 
+                borderRadius: 'var(--radius-md)', 
+                border: '1px solid var(--outline-variant)',
+                outline: 'none'
+              }} 
+            />
+          </div>
+
+          <button 
+            disabled={loading}
+            type="submit" 
+            style={{ 
+              width: '100%', 
+              padding: '14px', 
+              background: 'var(--primary)', 
+              color: 'white', 
+              border: 'none', 
+              borderRadius: 'var(--radius-md)', 
+              fontWeight: 700, 
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '8px'
+            }}
+          >
+            {loading ? '처리 중...' : (isLogin ? <><LogIn size={18} /> 로그인</> : <><UserPlus size={18} /> 가입 신청</>)}
+          </button>
+        </form>
+
+        <div style={{ marginTop: '24px', paddingTop: '24px', borderTop: '1px solid var(--outline-variant)' }}>
+          <p style={{ fontSize: '14px', color: 'var(--secondary)' }}>
+            {isLogin ? '시스템 사용이 처음이신가요?' : '이미 계정이 있으신가요?'}
+            <button 
+              onClick={() => setIsLogin(!isLogin)} 
+              style={{ 
+                background: 'none', 
+                border: 'none', 
+                color: 'var(--primary)', 
+                fontWeight: 700, 
+                marginLeft: '8px', 
+                cursor: 'pointer' 
+              }}
+            >
+              {isLogin ? '가입 신청하기' : '로그인하러 가기'}
+            </button>
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
