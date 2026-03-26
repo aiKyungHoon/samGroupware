@@ -280,15 +280,39 @@ export function OrgChart() {
                     <input type="number" style={inputStyle} value={team.count} onChange={e => setEditTeams(prev => prev.map((t, i) => i === tIdx ? { ...t, count: parseInt(e.target.value) || 0 } : t))} />
                   </div>
                 </div>
-                <label style={labelStyle}>구역 이름 ({team.areas.length}개)</label>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '8px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                  <label style={labelStyle}>구역 이름 ({team.areas.length}개)</label>
+                  <button
+                    onClick={() => setEditTeams(prev => prev.map((t, i) => i === tIdx ? { ...t, areas: [...t.areas, `${t.areas.length + 1}구역`] } : t))}
+                    style={{ display: 'flex', alignItems: 'center', gap: '4px', padding: '4px 12px', background: 'var(--primary)', color: 'white', border: 'none', borderRadius: 'var(--radius-md)', fontSize: '12px', fontWeight: 700, cursor: 'pointer' }}
+                  >
+                    + 구역 추가
+                  </button>
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                   {team.areas.map((area, aIdx) => (
-                    <input key={aIdx} style={{ ...inputStyle, textAlign: 'center', padding: '8px 4px' }} value={area}
-                      onChange={e => setEditTeams(prev => prev.map((t, i) => {
-                        if (i !== tIdx) return t;
-                        const a = [...t.areas]; a[aIdx] = e.target.value; return { ...t, areas: a };
-                      }))}
-                    />
+                    <div key={aIdx} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <span style={{ fontSize: '12px', color: '#9ca3af', fontWeight: 600, minWidth: '20px', textAlign: 'right' }}>{aIdx + 1}</span>
+                      <input
+                        style={{ ...inputStyle, flex: 1 }}
+                        value={area}
+                        onChange={e => setEditTeams(prev => prev.map((t, i) => {
+                          if (i !== tIdx) return t;
+                          const a = [...t.areas]; a[aIdx] = e.target.value; return { ...t, areas: a };
+                        }))}
+                      />
+                      <button
+                        onClick={() => setEditTeams(prev => prev.map((t, i) => {
+                          if (i !== tIdx) return t;
+                          const a = t.areas.filter((_, ai) => ai !== aIdx);
+                          return { ...t, areas: a };
+                        }))}
+                        disabled={team.areas.length <= 1}
+                        style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '30px', height: '30px', background: team.areas.length <= 1 ? '#f3f4f6' : '#fee2e2', border: 'none', borderRadius: '8px', cursor: team.areas.length <= 1 ? 'default' : 'pointer', flexShrink: 0, opacity: team.areas.length <= 1 ? 0.4 : 1 }}
+                      >
+                        <X size={14} color="#ef4444" />
+                      </button>
+                    </div>
                   ))}
                 </div>
               </div>
