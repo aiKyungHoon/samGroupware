@@ -7,11 +7,44 @@ interface DashboardProps {
 }
 
 const healthMetrics = [
-  { id: 'worship', title: '예배', icon: Users, status: 'good', score: '87.5%', desc: '출석률 안정권', category: 'growing' },
-  { id: 'education', title: '교육', icon: BookOpen, status: 'warning', score: '45.0%', desc: '수료율 확인 요망', category: 'growing' },
-  { id: 'accounting', title: '회계', icon: Calculator, status: 'good', score: '78.0%', desc: '납부율 양호', category: 'growing' },
-  { id: 'visits', title: '심방', icon: HeartHandshake, status: 'good', score: '95.0%', desc: '목표 심방 정상 진행', category: 'caring' },
-  { id: 'evangelism', title: '전도', icon: TrendingUp, status: 'danger', score: '7.0%', desc: '새가족 정착 집중 필요', category: 'caring' },
+  { 
+    id: 'worship', 
+    title: '예배', 
+    icon: Users, 
+    status: 'good', 
+    score: '87.5%', 
+    desc: '출석률 안정권 (지난주 대비 +2.1%)', 
+    category: 'growing' 
+  },
+  { 
+    id: 'education', 
+    title: '교육', 
+    icon: BookOpen, 
+    status: 'warning', 
+    score: '61.7%', 
+    desc: '교육 프로그램 참여도 분석', 
+    category: 'growing',
+    subMetrics: [
+      { label: '인맞은 시험 응시율', value: '72.4%' },
+      { label: '구역예배 실시율', value: '88.1%' },
+      { label: '심야라디오 출결', value: '24.5%' },
+    ]
+  },
+  { 
+    id: 'accounting', 
+    title: '회계', 
+    icon: Calculator, 
+    status: 'good', 
+    score: '84.2%', 
+    desc: '재정 건전성 및 납부 협조도', 
+    category: 'growing',
+    subMetrics: [
+      { label: '십일조 재적 납부율', value: '78.5%' },
+      { label: '청체비 재적 납부율', value: '89.9%' },
+    ]
+  },
+  { id: 'visits', title: '심방', icon: HeartHandshake, status: 'good', score: '95.0%', desc: '목표 심방 정상 진행 및 케어 안정화', category: 'caring' },
+  { id: 'evangelism', title: '전도', icon: TrendingUp, status: 'danger', score: '7.0%', desc: '새가족 정착율(목표 15%) 미달', category: 'caring' },
 ];
 
 const getStatusColor = (status: string) => {
@@ -117,7 +150,7 @@ export function Dashboard({ onTabChange }: DashboardProps) {
               <span style={{ width: '4px', height: '14px', background: 'var(--primary)', borderRadius: '2px' }}></span>
               사역 성장 지표 (Growing)
             </h3>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '16px' }}>
               {healthMetrics.filter(m => m.category === 'growing').map((metric) => (
                 <MetricCard key={metric.id} metric={metric} onClick={() => onTabChange(metric.id)} />
               ))}
@@ -130,7 +163,7 @@ export function Dashboard({ onTabChange }: DashboardProps) {
               <span style={{ width: '4px', height: '14px', background: 'var(--tertiary)', borderRadius: '2px' }}></span>
               성도 돌봄 지표 (Caring)
             </h3>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '16px' }}>
               {healthMetrics.filter(m => m.category === 'caring').map((metric) => (
                 <MetricCard key={metric.id} metric={metric} onClick={() => onTabChange(metric.id)} />
               ))}
@@ -180,18 +213,18 @@ export function Dashboard({ onTabChange }: DashboardProps) {
           <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
             <InsightCard 
               type="danger" 
-              title="전도 후 교육 연계 병목" 
-              desc="최근 3개월간 전도 정착률 목표 미달. 새가족 5주 기초반 수료율(45%)이 원인으로 분석됩니다." 
+              title="심야라디오 출결 하락 주의" 
+              desc="이번 달 심야라디오 출결 지표가 전월 대비 15% 하락했습니다. 교육 부서의 관심 사역 전환이 요구됩니다." 
             />
             <InsightCard 
               type="warning" 
-              title="심방 부재로 인한 출석 하락" 
-              desc="4월 심방 횟수 급감 후 5월 출석률 8% 하락. 이음팀에서 유사 징후 감지되었습니다." 
+              title="중점 전도 캠페인 필요" 
+              desc="현재 새가족 정착율 7%로 정체 중입니다. 5주 교육 수료 후 신앙 정착을 위한 멘토링 강화가 필요합니다." 
             />
             <InsightCard 
               type="success" 
-              title="재정 건전성 우수" 
-              desc="십일조 및 청체비 납부율이 목표치를 상회하는 78%를 기록 중입니다." 
+              title="재정 참여도 안정권" 
+              desc="청체비 재적 납부율이 89.9%로 역대 최고치를 기록하고 있습니다. 교구원들의 헌신도가 매우 높습니다." 
             />
           </div>
         </div>
@@ -211,7 +244,7 @@ function MetricCard({ metric, onClick }: { metric: any, onClick: () => void }) {
       onClick={onClick}
       style={{ 
         background: 'var(--surface-lowest)', 
-        padding: '24px', 
+        padding: '20px', 
         borderRadius: 'var(--radius-lg)', 
         boxShadow: hover ? 'var(--shadow-elevated)' : 'var(--shadow-ambient)',
         borderLeft: `4px solid ${getStatusColor(metric.status)}`,
@@ -224,18 +257,34 @@ function MetricCard({ metric, onClick }: { metric: any, onClick: () => void }) {
       }}
     >
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', color: 'var(--on-surface)', fontWeight: 700, fontSize: '16px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', color: 'var(--on-surface)', fontWeight: 700, fontSize: '15px' }}>
           <div style={{ background: 'var(--surface-low)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '6px' }}>
-            <Icon size={20} color="var(--secondary)" />
+            <Icon size={18} color="var(--secondary)" />
           </div>
           {metric.title}
         </div>
         {getStatusIcon(metric.status)}
       </div>
-      <div style={{ fontSize: '28px', fontWeight: 800, fontFamily: 'var(--font-display)', marginBottom: '8px' }}>
-        {metric.score}
+      
+      <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px', marginBottom: '12px' }}>
+        <span style={{ fontSize: '24px', fontWeight: 800, fontFamily: 'var(--font-display)' }}>
+          {metric.score}
+        </span>
+        <span style={{ fontSize: '12px', color: 'var(--secondary)', fontWeight: 500 }}>통합지표</span>
       </div>
-      <div style={{ fontSize: '13px', color: 'var(--secondary)', lineHeight: 1.5, flex: 1 }}>
+
+      {metric.subMetrics && (
+        <div style={{ background: 'var(--surface-low)', padding: '12px', borderRadius: 'var(--radius-md)', marginBottom: '12px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          {metric.subMetrics.map((sm: any, idx: number) => (
+            <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '12px' }}>
+              <span style={{ color: 'var(--secondary)', fontWeight: 500 }}>{sm.label}</span>
+              <span style={{ color: 'var(--on-surface)', fontWeight: 700 }}>{sm.value}</span>
+            </div>
+          ))}
+        </div>
+      )}
+
+      <div style={{ fontSize: '12px', color: 'var(--secondary)', lineHeight: 1.4, flex: 1, opacity: 0.8 }}>
         {metric.desc}
       </div>
       
