@@ -49,6 +49,12 @@ export function Worship() {
     ));
   };
 
+  const updateReason = (id: string, reason: string) => {
+    setAttendance((prev: WorshipAttendance[]) => prev.map((a: WorshipAttendance) => 
+      a.id === id ? { ...a, note: reason } : a
+    ));
+  };
+
   const isAttended = (a: WorshipAttendance) => {
     return Object.values(a.regular).some(v => v) || Object.values(a.base).some(v => v);
   };
@@ -89,7 +95,7 @@ export function Worship() {
           </div>
 
           <div style={{ overflowX: 'auto' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: '800px' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: '1000px' }}>
               <thead>
                 <tr style={{ background: 'var(--surface-low)', borderBottom: '1.5px solid var(--outline-variant)' }}>
                   <th style={{ padding: '16px 24px', fontSize: '13px', fontWeight: 700, color: 'var(--secondary)' }}>이름</th>
@@ -97,6 +103,7 @@ export function Worship() {
                   <th style={{ padding: '16px 12px', fontSize: '13px', fontWeight: 700, color: 'var(--primary)', textAlign: 'center' }} colSpan={4}>정규성전</th>
                   <th style={{ padding: '16px 12px', fontSize: '13px', fontWeight: 700, color: '#0ea5e9', textAlign: 'center' }} colSpan={2}>거점예배</th>
                   <th style={{ padding: '16px 24px', fontSize: '13px', fontWeight: 700, color: 'var(--on-surface)', textAlign: 'center' }}>종합(예배)</th>
+                  <th style={{ padding: '16px 24px', fontSize: '13px', fontWeight: 700, color: 'var(--secondary)' }}>사유 (비고)</th>
                 </tr>
                 <tr style={{ background: 'var(--surface-low)', borderBottom: '1.5px solid var(--outline-variant)' }}>
                   <th colSpan={2}></th>
@@ -106,6 +113,7 @@ export function Worship() {
                   {['12', '17'].map(t => (
                     <th key={t} style={{ padding: '8px 4px', fontSize: '11px', fontWeight: 800, textAlign: 'center', color: 'var(--secondary)' }}>{t}</th>
                   ))}
+                  <th></th>
                   <th></th>
                 </tr>
               </thead>
@@ -138,6 +146,14 @@ export function Worship() {
                       <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '4px 12px', background: isAttended(a) ? '#dcfce7' : '#fee2e2', color: isAttended(a) ? '#166534' : '#991b1b', borderRadius: 'var(--radius-full)', fontSize: '12px', fontWeight: 800 }}>
                         {isAttended(a) ? '출석' : '결석'}
                       </div>
+                    </td>
+                    <td style={{ padding: '16px 24px' }}>
+                      <input 
+                        value={a.note}
+                        onChange={(e) => updateReason(a.id, e.target.value)}
+                        placeholder="사유 입력..."
+                        style={{ width: '100%', minWidth: '150px', padding: '6px 10px', borderRadius: '6px', border: '1px solid var(--outline-variant)', fontSize: '12px', outline: 'none' }}
+                      />
                     </td>
                   </tr>
                 ))}
