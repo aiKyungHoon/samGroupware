@@ -206,36 +206,47 @@ export function Worship() {
         </div>
       </div>
 
-      <div className="responsive-grid-2" style={{ gap: '24px', marginBottom: '32px' }}>
-        {/* Regular Worship Slot Summary */}
-        <div style={{ background: 'var(--surface-lowest)', padding: '24px', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-ambient)' }}>
-          <h3 style={{ fontSize: '18px', fontWeight: 800, marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <span style={{ width: '4px', height: '18px', background: 'var(--primary)', borderRadius: '2px' }}></span>
-            정규성전 (09, 12, 15, 20)
-          </h3>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '16px' }}>
-            {['09', '12', '15', '20'].map(t => (
-              <div key={t} style={{ background: 'var(--surface-low)', padding: '16px', borderRadius: 'var(--radius-md)', textAlign: 'center' }}>
-                <div style={{ fontSize: '13px', color: 'var(--secondary)', marginBottom: '4px' }}>{t}:00 타임</div>
-                <div style={{ fontSize: '24px', fontWeight: 800, color: 'var(--primary)' }}>{getSlotCount('regular', t)}<span style={{ fontSize: '14px', fontWeight: 500, color: 'var(--secondary)', marginLeft: '2px' }}>명</span></div>
-              </div>
-            ))}
+      {/* Unified Worship Summary Section */}
+      <div style={{ background: 'var(--surface-lowest)', padding: '24px', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-ambient)', marginBottom: '32px' }}>
+        <h3 style={{ fontSize: '18px', fontWeight: 800, marginBottom: '24px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <span style={{ width: '4px', height: '18px', background: 'var(--primary)', borderRadius: '2px' }}></span>
+          실시간 예배 출석 현황 (정규 + 거점)
+        </h3>
+        
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '32px' }}>
+          {/* Regular Slots */}
+          <div>
+            <h4 style={{ fontSize: '14px', fontWeight: 700, color: 'var(--secondary)', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--primary)' }}></span>
+              정규성전 (09, 12, 15, 20)
+            </h4>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '12px' }}>
+              {['09', '12', '15', '20'].map(t => (
+                <div key={t} style={{ background: 'var(--surface-low)', padding: '16px', borderRadius: 'var(--radius-md)', textAlign: 'center' }}>
+                  <div style={{ fontSize: '12px', color: 'var(--secondary)', marginBottom: '4px' }}>{t}:00</div>
+                  <div style={{ fontSize: '20px', fontWeight: 800, color: 'var(--primary)' }}>{getSlotCount('regular', t)}<span style={{ fontSize: '12px', fontWeight: 500, color: 'var(--secondary)', marginLeft: '2px' }}>명</span></div>
+                </div>
+              ))}
+            </div>
           </div>
-        </div>
 
-        {/* Base Worship Slot Summary */}
-        <div style={{ background: 'var(--surface-lowest)', padding: '24px', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-ambient)' }}>
-          <h3 style={{ fontSize: '18px', fontWeight: 800, marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <span style={{ width: '4px', height: '18px', background: '#0ea5e9', borderRadius: '2px' }}></span>
-            거점예배 (12, 17)
-          </h3>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '16px' }}>
-            {['12', '17'].map(t => (
-              <div key={t} style={{ background: 'var(--surface-low)', padding: '16px', borderRadius: 'var(--radius-md)', textAlign: 'center' }}>
-                <div style={{ fontSize: '13px', color: 'var(--secondary)', marginBottom: '4px' }}>{t}:00 타임</div>
-                <div style={{ fontSize: '24px', fontWeight: 800, color: '#0ea5e9' }}>{getSlotCount('base', t)}<span style={{ fontSize: '14px', fontWeight: 500, color: 'var(--secondary)', marginLeft: '2px' }}>명</span></div>
-              </div>
-            ))}
+          {/* Base Slots */}
+          <div>
+            <h4 style={{ fontSize: '14px', fontWeight: 700, color: 'var(--secondary)', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#0ea5e9' }}></span>
+              거점예배 (12, 17)
+            </h4>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '12px' }}>
+              {['12', '17'].map(t => (
+                <div key={t} style={{ background: 'var(--surface-low)', padding: '16px', borderRadius: 'var(--radius-md)', textAlign: 'center' }}>
+                  <div style={{ fontSize: '12px', color: 'var(--secondary)', marginBottom: '4px' }}>{t}:00</div>
+                  <div style={{ fontSize: '20px', fontWeight: 800, color: '#0ea5e9' }}>{getSlotCount('base', t)}<span style={{ fontSize: '12px', fontWeight: 500, color: 'var(--secondary)', marginLeft: '2px' }}>명</span></div>
+                </div>
+              ))}
+              {/* Empty Placeholder to fill grid 2x2 for balance if needed */}
+              <div style={{ opacity: 0, padding: '16px' }}></div>
+              <div style={{ opacity: 0, padding: '16px' }}></div>
+            </div>
           </div>
         </div>
       </div>
