@@ -206,7 +206,7 @@ export function Worship() {
         </div>
       </div>
 
-      <div className="responsive-grid-2" style={{ gap: '24px' }}>
+      <div className="responsive-grid-2" style={{ gap: '24px', marginBottom: '32px' }}>
         {/* Regular Worship Slot Summary */}
         <div style={{ background: 'var(--surface-lowest)', padding: '24px', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-ambient)' }}>
           <h3 style={{ fontSize: '18px', fontWeight: 800, marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '10px' }}>
@@ -238,6 +238,33 @@ export function Worship() {
             ))}
           </div>
         </div>
+      </div>
+
+      {/* Reason Summary Section */}
+      <div style={{ background: 'var(--surface-lowest)', padding: '24px', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-ambient)' }}>
+        <h3 style={{ fontSize: '18px', fontWeight: 800, marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <span style={{ width: '4px', height: '18px', background: 'var(--error)', borderRadius: '2px' }}></span>
+          결석 및 특이 사유 요약
+        </h3>
+        {attendance.filter(a => a.note.trim() !== '').length > 0 ? (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            {attendance.filter(a => a.note.trim() !== '').map(a => (
+              <div key={a.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 20px', background: 'var(--surface-low)', borderRadius: 'var(--radius-md)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <span style={{ fontWeight: 700, fontSize: '15px' }}>{a.name}</span>
+                  <span style={{ fontSize: '12px', color: 'var(--secondary)', background: 'white', padding: '2px 8px', borderRadius: '4px', border: '1px solid var(--outline-variant)' }}>{a.team}</span>
+                </div>
+                <div style={{ color: 'var(--on-surface)', fontSize: '14px', fontWeight: 500 }}>
+                  {a.note}
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div style={{ textAlign: 'center', padding: '40px', color: 'var(--secondary)', fontSize: '14px' }}>
+            기록된 특이 사유가 없습니다.
+          </div>
+        )}
       </div>
     </div>
   );
