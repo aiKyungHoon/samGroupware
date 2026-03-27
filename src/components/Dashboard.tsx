@@ -18,6 +18,7 @@ const healthMetrics = [
   },
   { 
     id: 'edu_exam', 
+    target: 'education',
     title: '인맞은 시험 응시율', 
     icon: BookOpen, 
     status: 'warning', 
@@ -27,6 +28,7 @@ const healthMetrics = [
   },
   { 
     id: 'edu_worship', 
+    target: 'education',
     title: '구역예배 실시율', 
     icon: Users, 
     status: 'good', 
@@ -36,6 +38,7 @@ const healthMetrics = [
   },
   { 
     id: 'edu_radio', 
+    target: 'education',
     title: '심야라디오 출결', 
     icon: BookOpen, 
     status: 'danger', 
@@ -45,6 +48,7 @@ const healthMetrics = [
   },
   { 
     id: 'acc_tithe', 
+    target: 'accounting',
     title: '십일조 납부율', 
     icon: Calculator, 
     status: 'good', 
@@ -54,6 +58,7 @@ const healthMetrics = [
   },
   { 
     id: 'acc_fee', 
+    target: 'accounting',
     title: '청체비 납부율', 
     icon: Calculator, 
     status: 'good', 
@@ -170,7 +175,7 @@ export function Dashboard({ onTabChange }: DashboardProps) {
             </h3>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '16px' }}>
               {healthMetrics.filter(m => m.category === 'growing').map((metric) => (
-                <MetricCard key={metric.id} metric={metric} onClick={() => onTabChange(metric.id)} />
+                <MetricCard key={metric.id} metric={metric} onClick={() => onTabChange(metric.target || metric.id)} />
               ))}
             </div>
           </div>
@@ -183,7 +188,7 @@ export function Dashboard({ onTabChange }: DashboardProps) {
             </h3>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '16px' }}>
               {healthMetrics.filter(m => m.category === 'caring').map((metric) => (
-                <MetricCard key={metric.id} metric={metric} onClick={() => onTabChange(metric.id)} />
+                <MetricCard key={metric.id} metric={metric} onClick={() => onTabChange(metric.target || metric.id)} />
               ))}
             </div>
           </div>
