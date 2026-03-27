@@ -9,42 +9,60 @@ interface DashboardProps {
 const healthMetrics = [
   { 
     id: 'worship', 
-    title: '예배', 
+    title: '예배 출석률', 
     icon: Users, 
     status: 'good', 
     score: '87.5%', 
-    desc: '출석률 안정권 (지난주 대비 +2.1%)', 
+    desc: '지난주 대비 +2.1%', 
     category: 'growing' 
   },
   { 
-    id: 'education', 
-    title: '교육', 
+    id: 'edu_exam', 
+    title: '인맞은 시험 응시율', 
     icon: BookOpen, 
     status: 'warning', 
-    score: '61.7%', 
-    desc: '교육 프로그램 참여도 분석', 
-    category: 'growing',
-    subMetrics: [
-      { label: '인맞은 시험 응시율', value: '72.4%' },
-      { label: '구역예배 실시율', value: '88.1%' },
-      { label: '심야라디오 출결', value: '24.5%' },
-    ]
+    score: '72.4%', 
+    desc: '목표치(85%) 대비 미달', 
+    category: 'growing'
   },
   { 
-    id: 'accounting', 
-    title: '회계', 
+    id: 'edu_worship', 
+    title: '구역예배 실시율', 
+    icon: Users, 
+    status: 'good', 
+    score: '88.1%', 
+    desc: '팀별 평균 실시율 양호', 
+    category: 'growing'
+  },
+  { 
+    id: 'edu_radio', 
+    title: '심야라디오 출결', 
+    icon: BookOpen, 
+    status: 'danger', 
+    score: '24.5%', 
+    desc: '전년 동기 대비 급감', 
+    category: 'growing'
+  },
+  { 
+    id: 'acc_tithe', 
+    title: '십일조 납부율', 
     icon: Calculator, 
     status: 'good', 
-    score: '84.2%', 
-    desc: '재정 건전성 및 납부 협조도', 
-    category: 'growing',
-    subMetrics: [
-      { label: '십일조 재적 납부율', value: '78.5%' },
-      { label: '청체비 재적 납부율', value: '89.9%' },
-    ]
+    score: '78.5%', 
+    desc: '전체 재적 인원 기준', 
+    category: 'growing'
   },
-  { id: 'visits', title: '심방', icon: HeartHandshake, status: 'good', score: '95.0%', desc: '목표 심방 정상 진행 및 케어 안정화', category: 'caring' },
-  { id: 'evangelism', title: '전도', icon: TrendingUp, status: 'danger', score: '7.0%', desc: '새가족 정착율(목표 15%) 미달', category: 'caring' },
+  { 
+    id: 'acc_fee', 
+    title: '청체비 납부율', 
+    icon: Calculator, 
+    status: 'good', 
+    score: '89.9%', 
+    desc: '역대 최고 납부율 달성', 
+    category: 'growing'
+  },
+  { id: 'visits', title: '심방 실시율', icon: HeartHandshake, status: 'good', score: '95.0%', desc: '케어 안정화 단계', category: 'caring' },
+  { id: 'evangelism', title: '전도 정착률', icon: TrendingUp, status: 'danger', score: '7.0%', desc: '목료 15% 집중 필요', category: 'caring' },
 ];
 
 const getStatusColor = (status: string) => {
@@ -244,7 +262,7 @@ function MetricCard({ metric, onClick }: { metric: any, onClick: () => void }) {
       onClick={onClick}
       style={{ 
         background: 'var(--surface-lowest)', 
-        padding: '20px', 
+        padding: '24px', 
         borderRadius: 'var(--radius-lg)', 
         boxShadow: hover ? 'var(--shadow-elevated)' : 'var(--shadow-ambient)',
         borderLeft: `4px solid ${getStatusColor(metric.status)}`,
@@ -257,34 +275,18 @@ function MetricCard({ metric, onClick }: { metric: any, onClick: () => void }) {
       }}
     >
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', color: 'var(--on-surface)', fontWeight: 700, fontSize: '15px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', color: 'var(--on-surface)', fontWeight: 700, fontSize: '16px' }}>
           <div style={{ background: 'var(--surface-low)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '6px' }}>
-            <Icon size={18} color="var(--secondary)" />
+            <Icon size={20} color="var(--secondary)" />
           </div>
           {metric.title}
         </div>
         {getStatusIcon(metric.status)}
       </div>
-      
-      <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px', marginBottom: '12px' }}>
-        <span style={{ fontSize: '24px', fontWeight: 800, fontFamily: 'var(--font-display)' }}>
-          {metric.score}
-        </span>
-        <span style={{ fontSize: '12px', color: 'var(--secondary)', fontWeight: 500 }}>통합지표</span>
+      <div style={{ fontSize: '28px', fontWeight: 800, fontFamily: 'var(--font-display)', marginBottom: '8px' }}>
+        {metric.score}
       </div>
-
-      {metric.subMetrics && (
-        <div style={{ background: 'var(--surface-low)', padding: '12px', borderRadius: 'var(--radius-md)', marginBottom: '12px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-          {metric.subMetrics.map((sm: any, idx: number) => (
-            <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '12px' }}>
-              <span style={{ color: 'var(--secondary)', fontWeight: 500 }}>{sm.label}</span>
-              <span style={{ color: 'var(--on-surface)', fontWeight: 700 }}>{sm.value}</span>
-            </div>
-          ))}
-        </div>
-      )}
-
-      <div style={{ fontSize: '12px', color: 'var(--secondary)', lineHeight: 1.4, flex: 1, opacity: 0.8 }}>
+      <div style={{ fontSize: '13px', color: 'var(--secondary)', lineHeight: 1.5, flex: 1 }}>
         {metric.desc}
       </div>
       
