@@ -84,7 +84,20 @@ const getStatusIcon = (status: string) => {
   return null;
 };
 
-const correlationDataOptions: Record<string, any> = {
+interface ChartDataOption {
+  label: string;
+  barKey: string;
+  lineKey: string;
+  barName: string;
+  lineName: string;
+  barColor: string;
+  lineColor: string;
+  desc: string;
+  domain: [number, number];
+  data: Array<{ name: string; [key: string]: string | number }>;
+}
+
+const correlationDataOptions: Record<string, ChartDataOption> = {
   'visit_worship': {
     label: '심방(원인) ➔ 예배(결과)',
     barKey: '심방횟수',
@@ -256,7 +269,18 @@ export function Dashboard({ onTabChange }: DashboardProps) {
   )
 }
 
-function MetricCard({ metric, onClick }: { metric: any, onClick: () => void }) {
+function MetricCard({ metric, onClick }: { 
+  metric: { 
+    id: string; 
+    title: string; 
+    icon: React.ElementType; 
+    status: string; 
+    score: string; 
+    desc: string; 
+    target?: string;
+  }, 
+  onClick: () => void 
+}) {
   const Icon = metric.icon;
   const [hover, setHover] = useState(false);
 

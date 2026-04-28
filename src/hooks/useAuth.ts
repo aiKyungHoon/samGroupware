@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
-import { auth, db } from '../firebase';
+import { auth, firestore } from '../firebase';
 import { onAuthStateChanged } from 'firebase/auth';
-import { ref, onValue } from 'firebase/database';
+import { doc, onSnapshot } from 'firebase/firestore';
 
 export interface UserPermissions {
   worship: 'read' | 'write';
@@ -18,7 +18,7 @@ export interface UserProfile {
   name: string;
   department: string;
   role: string;
-  isApproved: boolean;
+  status: 'pending' | 'approved' | 'rejected';
   permissions: UserPermissions;
 }
 
@@ -32,8 +32,19 @@ const defaultPermissions: UserPermissions = {
 };
 
 // Helper to determine permissions based on department/role
-const getPermissionsByDept = (dept: string): UserPermissions => {
+const getPermissionsByDept = (dept: string, role: string): UserPermissions => {
   const p = { ...defaultPermissions };
+
+  if (role === 'admin') {
+    return {
+      worship: 'write',
+      education: 'write',
+      accounting: 'write',
+      visits: 'write',
+      evangelism: 'write',
+      orgChart: 'write',
+    };
+  }
 
   // 총괄 - admin, 임원, 지역장 (전체 권한)
   const superAdminDepts = ['admin', '임원', '지역장'];
@@ -67,13 +78,6 @@ const getPermissionsByDept = (dept: string): UserPermissions => {
     case '회계부팀장':
       p.accounting = 'write';
       break;
-    case '전도교관':
-    case '문화팀장':
-    case '문화부팀장':
-    case '양때팀장':
-      // These are admins but specific write access wasn't defined for all 
-      // I'll grant them base write for their areas if implied, but for now following user list
-      break;
   }
 
   return p;
@@ -86,23 +90,33 @@ export function useAuth() {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
       if (firebaseUser) {
-        // Fetch profile from RTDB
-        const userRef = ref(db, `users/${firebaseUser.uid}`);
-        onValue(userRef, (snapshot) => {
-          if (snapshot.exists()) {
-            const data = snapshot.val();
-            // Inject dynamic permissions based on department
-            const permissions = getPermissionsByDept(data.department);
+        // Fetch profile from Firestore
+        const userDocRef = doc(firestore, 'users', firebaseUser.uid);
+        const unsubDoc = onSnapshot(userDocRef, (docSnap) => {
+          if (docSnap.exists()) {
+            const data = docSnap.data();
+            const permissions = getPermissionsByDept(data.department || '', data.role || 'user');
             
             setUser({
-              ...data,
+              uid: firebaseUser.uid,
+              id: data.id || '',
+              name: data.name || '',
+              department: data.department || '',
+              role: data.role || 'user',
+              status: data.status || 'pending',
               permissions
             });
           } else {
             setUser(null);
           }
           setLoading(false);
+        }, (error) => {
+          console.error("Error fetching user profile:", error);
+          setUser(null);
+          setLoading(false);
         });
+
+        return () => unsubDoc();
       } else {
         setUser(null);
         setLoading(false);

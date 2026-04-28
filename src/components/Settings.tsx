@@ -27,7 +27,7 @@ export function Settings({ user }: { user: UserProfile }) {
 
   const handleApprove = async (userId: string) => {
     try {
-      await update(ref(db, `users/${userId}`), { isApproved: true });
+      await update(ref(db, `users/${userId}`), { status: 'approved' });
     } catch (error) {
       console.error('Error approving user:', error);
       alert('승인 중 오류가 발생했습니다.');
@@ -37,7 +37,7 @@ export function Settings({ user }: { user: UserProfile }) {
   const handleReject = async (userId: string) => {
     if (!window.confirm('정말 삭제하시겠습니까?')) return;
     try {
-      await update(ref(db, `users/${userId}`), { isApproved: false }); // or delete
+      await update(ref(db, `users/${userId}`), { status: 'rejected' }); // or delete
     } catch (error) {
       console.error('Error rejecting user:', error);
     }
@@ -63,8 +63,8 @@ export function Settings({ user }: { user: UserProfile }) {
     );
   }
 
-  const pendingUsers = Object.entries(users).filter(([_, u]) => !u.isApproved);
-  const approvedUsers = Object.entries(users).filter(([_, u]) => u.isApproved);
+  const pendingUsers = Object.entries(users).filter(([_, u]) => u.status === 'pending');
+  const approvedUsers = Object.entries(users).filter(([_, u]) => u.status === 'approved');
 
   return (
     <div style={{ padding: '32px', flex: 1, overflowY: 'auto' }}>
