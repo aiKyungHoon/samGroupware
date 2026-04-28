@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Shield, Check, X, User } from 'lucide-react';
+import { Shield, X, User } from 'lucide-react';
 import { collection, getDocs, doc, updateDoc } from 'firebase/firestore';
 import { firestore } from '../firebase';
 import { useAuth } from '../hooks/useAuth';
@@ -139,13 +139,13 @@ export function AdminPanel() {
                             display: 'flex', alignItems: 'center', gap: '4px', fontSize: '12px', 
                             background: isChecked ? 'var(--primary-container)' : 'var(--surface-lowest)',
                             color: isChecked ? 'var(--on-primary)' : 'var(--secondary)',
-                            padding: '4px 8px', borderRadius: 'var(--radius-md)', cursor: user.uid === u.uid ? 'not-allowed' : 'pointer',
+                            padding: '4px 8px', borderRadius: 'var(--radius-md)', cursor: user?.uid === u.uid ? 'not-allowed' : 'pointer',
                             border: `1px solid ${isChecked ? 'var(--primary)' : 'var(--outline-variant)'}`
                           }}>
                             <input 
                               type="checkbox" 
                               checked={isChecked} 
-                              disabled={user.uid === u.uid}
+                              disabled={user?.uid === u.uid}
                               onChange={() => handleToggleRole(u.id, u.roles || (u.role === 'admin' ? ['master'] : []), role.id)}
                               style={{ display: 'none' }}
                             />
