@@ -1,25 +1,34 @@
-function parseCSVLine(line) {
-  const result = [];
-  let current = '';
-  let inQuotes = false;
-  
-  for (let i = 0; i < line.length; i++) {
-    const char = line[i];
-    if (char === '"' && line[i+1] === '"') {
-      current += '"';
-      i++;
-    } else if (char === '"') {
-      inQuotes = !inQuotes;
-    } else if (char === ',' && !inQuotes) {
-      result.push(current.trim());
-      current = '';
-    } else {
-      current += char;
+import { initializeApp } from "firebase/app";
+import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword } from "firebase/auth";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCF6EmMKxlrHQqOEZMhp5gKAeeMXVCG0iU",
+  authDomain: "churchware-web-2026.firebaseapp.com",
+  projectId: "churchware-web-2026",
+  storageBucket: "churchware-web-2026.firebasestorage.app",
+  messagingSenderId: "471284930598",
+  appId: "1:471284930598:web:801e75ebe3a8f57c1c6ee7"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+
+async function testAuth() {
+  const email = "admin@churchware.app";
+  const pwd = "admin12345!@";
+  try {
+    console.log("Attempting sign in...");
+    await signInWithEmailAndPassword(auth, email, pwd);
+    console.log("Sign in successful!");
+  } catch (err) {
+    console.log("Sign in failed:", err.code);
+    try {
+      console.log("Attempting create...");
+      await createUserWithEmailAndPassword(auth, email, pwd);
+      console.log("Create successful!");
+    } catch (createErr) {
+      console.log("Create failed:", createErr.code);
     }
   }
-  result.push(current.trim());
-  return result;
 }
-
-console.log(parseCSVLine(',보라,1구역,구역원,이인용,'));
-console.log(parseCSVLine('양때,보라,1구역,"팀장, 구역장",김규리,'));
+testAuth().then(() => process.exit(0));

@@ -151,6 +151,12 @@ a {
   transition: opacity 0.3s ease;
 }
 
+@media (min-width: 769px) {
+  .sidebar-overlay {
+    display: none !important;
+  }
+}
+
 .sidebar-overlay.open {
   opacity: 1;
   pointer-events: auto;
@@ -251,11 +257,27 @@ a {
   display: none !important;
 }
 
+.team-header-container {
+  padding: 24px 32px 0;
+}
+
+.dashboard-container {
+  padding: 32px;
+}
+
 @media (max-width: 768px) {
   .mobile-only {
     display: flex !important;
   }
   .desktop-only {
     display: none !important;
+  }
+  
+  .team-header-container {
+    padding: 16px 16px 0;
+  }
+  
+  .dashboard-container {
+    padding: 16px;
   }
 }

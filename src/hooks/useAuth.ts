@@ -16,8 +16,10 @@ export interface UserProfile {
   uid: string;
   id: string;
   name: string;
+  nickname?: string;
   department: string;
   role: string;
+  roles?: string[];
   status: 'pending' | 'approved' | 'rejected';
   permissions: UserPermissions;
 }
@@ -101,8 +103,10 @@ export function useAuth() {
               uid: firebaseUser.uid,
               id: data.id || '',
               name: data.name || '',
+              nickname: data.nickname || '',
               department: data.department || '',
               role: data.role || 'user',
+              roles: data.roles || [],
               status: data.status || 'pending',
               permissions
             });

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Menu, LayoutDashboard, BookOpen, UserCheck, UserPlus, ShieldCheck, Users, Clock, LogOut } from 'lucide-react'
+import { Menu, LayoutDashboard, BookOpen, UserCheck, UserPlus, ShieldCheck, Users, Clock, LogOut, Calculator, HeartHandshake } from 'lucide-react'
 import { Sidebar } from './components/Sidebar'
 import { Dashboard } from './components/Dashboard'
 import { OrgChart } from './components/OrgChart'
@@ -10,6 +10,9 @@ import { Accounting } from './components/Accounting'
 import { Visits } from './components/Visits'
 import { useAuth } from './hooks/useAuth'
 import { Auth } from './components/Auth/Auth'
+import { AdminPanel } from './components/AdminPanel'
+
+import { TeamManagement } from './components/TeamManagement'
 
 function App() {
   const { user, loading, logout } = useAuth();
@@ -21,7 +24,7 @@ function App() {
       case 'dashboard':
         return <Dashboard onTabChange={setActiveTab} />;
       case 'worship':
-        return <Worship />;
+        return <Worship user={user} />;
       case 'education':
         return <Education />;
       case 'accounting':
@@ -32,6 +35,14 @@ function App() {
         return <Evangelism />;
       case 'orgchart':
         return <OrgChart />;
+      case 'admin':
+        return <AdminPanel />;
+      case 'team_bora':
+        return <TeamManagement teamName="보라팀" user={user} />;
+      case 'team_haebom':
+        return <TeamManagement teamName="해봄팀" user={user} />;
+      case 'team_ieum':
+        return <TeamManagement teamName="이음팀" user={user} />;
       default:
         return <Dashboard onTabChange={setActiveTab} />;
     }
@@ -140,6 +151,7 @@ function App() {
       >
         <Sidebar
           activeTab={activeTab}
+          user={user}
           onTabChange={(id) => {
             setActiveTab(id);
             if (window.innerWidth <= 768) setIsSidebarOpen(false); // Close on mobile after selection
@@ -227,8 +239,20 @@ function App() {
             { id: 'worship', icon: UserCheck, label: '예배' },
             { id: 'education', icon: BookOpen, label: '교육' },
             { id: 'orgchart', icon: ShieldCheck, label: '조직도' },
-            { id: 'evangelism', icon: UserPlus, label: '전도' }
-          ].map((item) => (
+            { id: 'evangelism', icon: UserPlus, label: '전도' },
+            { id: 'accounting', icon: Calculator, label: '회계' },
+            { id: 'visits', icon: HeartHandshake, label: '심방' }
+          ].filter(item => {
+            if (item.id === 'dashboard' || item.id === 'orgchart') return true;
+            const roles = user?.roles || [];
+            if (roles.includes('master') || user?.role === 'admin') return true;
+            if (item.id === 'worship' && roles.includes('menu_worship')) return true;
+            if (item.id === 'education' && roles.includes('menu_education')) return true;
+            if (item.id === 'evangelism' && roles.includes('menu_evangelism')) return true;
+            if (item.id === 'accounting' && roles.includes('menu_accounting')) return true;
+            if (item.id === 'visits' && roles.includes('menu_visits')) return true;
+            return false;
+          }).map((item) => (
             <button
               key={item.id}
               onClick={() => setActiveTab(item.id)}

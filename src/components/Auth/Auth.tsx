@@ -17,24 +17,19 @@ export function Auth({ onLoginSuccess }: AuthProps) {
   const [id, setId] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
-  const [department, setDepartment] = useState('');
-
-  const departments = [
-    '임원', '지역장', '지역서기', '전도교관', '심방팀장', '문화팀장', '교육팀장', '회계팀장', 
-    '양때팀장', '구역장', '팀서기', '교육서기', '회계서기', '심방서기', '부구역장'
-  ];
+  const [nickname, setNickname] = useState('');
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError('');
     
-    const email = `${id.trim()}@churchware.app`;
+    const email = `${id.trim().toLowerCase()}@churchware.app`;
     const pwd = password.trim();
 
     try {
       // Special case: Master Admin Account Auto-creation
-      if (id.trim() === 'admin' && pwd === 'admin12345!@') {
+      if (id.trim().toLowerCase() === 'admin' && pwd === 'admin12345!@') {
         try {
           await signInWithEmailAndPassword(auth, email, pwd);
           if (onLoginSuccess) onLoginSuccess(auth.currentUser);
@@ -48,7 +43,7 @@ export function Auth({ onLoginSuccess }: AuthProps) {
               uid: userCredential.user.uid,
               id: 'admin',
               name: '마스터 관리자',
-              department: 'admin',
+              nickname: 'admin',
               status: 'approved',
               role: 'admin',
               createdAt: new Date().toISOString()
@@ -86,15 +81,16 @@ export function Auth({ onLoginSuccess }: AuthProps) {
     setError('');
 
     try {
-      const email = `${id}@churchware.app`;
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const email = `${id.trim().toLowerCase()}@churchware.app`;
+      const pwd = password.trim();
+      const userCredential = await createUserWithEmailAndPassword(auth, email, pwd);
       
       // Create user profile in Firestore
       await setDoc(doc(firestore, 'users', userCredential.user.uid), {
         uid: userCredential.user.uid,
         id,
         name,
-        department,
+        nickname,
         status: 'pending',
         role: 'user',
         createdAt: new Date().toISOString()
@@ -198,23 +194,21 @@ export function Auth({ onLoginSuccess }: AuthProps) {
               />
             </div>
             <div style={{ marginBottom: '20px' }}>
-              <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, color: 'var(--secondary)', marginBottom: '6px' }}>부서명</label>
-              <select 
+              <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, color: 'var(--secondary)', marginBottom: '6px' }}>닉네임</label>
+              <input 
                 required
-                value={department}
-                onChange={(e) => setDepartment(e.target.value)}
+                type="text" 
+                value={nickname}
+                onChange={(e) => setNickname(e.target.value)}
+                placeholder="사용할 닉네임 (활동명)을 입력하세요" 
                 style={{ 
                   width: '100%', 
                   padding: '12px 16px', 
                   borderRadius: 'var(--radius-md)', 
                   border: '1px solid var(--outline-variant)',
-                  background: 'white',
                   outline: 'none'
-                }}
-              >
-                <option value="">부서를 선택하세요</option>
-                {departments.map(dept => <option key={dept} value={dept}>{dept}</option>)}
-              </select>
+                }} 
+              />
             </div>
           </>
         )}

@@ -28,14 +28,36 @@ const mockAttendance: WorshipAttendance[] = [
   { id: '5', name: '복서경', team: '보라팀', regular: { '09': false, '12': false, '15': false, '20': true }, base: { '12': false, '17': false }, note: '' },
 ];
 
-export function Worship() {
+export function Worship({ user }: { user?: any }) {
   const [showDetailed, setShowDetailed] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+  
+  // Date & Team Selectors State
+  const [selectedMonth, setSelectedMonth] = useState('2026-05');
+  const [selectedWeek, setSelectedWeek] = useState('1주차');
+  
+  // Compute allowed teams for this user
+  const roles = user?.roles || [];
+  const isMaster = roles.includes('master') || user?.role === 'admin';
+  
+  let initialTeam = '전체';
+  if (!isMaster) {
+    if (roles.includes('team_bora')) initialTeam = '보라팀';
+    else if (roles.includes('team_haebom')) initialTeam = '해봄팀';
+    else if (roles.includes('team_ieum')) initialTeam = '이음팀';
+  }
+  const [selectedTeam, setSelectedTeam] = useState(initialTeam);
+
   const [attendance, setAttendance] = useState<WorshipAttendance[]>(mockAttendance);
 
-  const filteredAttendance = attendance.filter((a: WorshipAttendance) => 
-    a.name.includes(searchTerm) || a.team.includes(searchTerm)
-  );
+  const filteredAttendance = attendance.filter((a: WorshipAttendance) => {
+    // 1. Team Filter
+    if (selectedTeam !== '전체' && a.team !== selectedTeam) return false;
+    // 2. Search Filter
+    if (searchTerm && !a.name.includes(searchTerm) && !a.team.includes(searchTerm)) return false;
+    
+    return true;
+  });
 
   const toggleRegular = (id: string, time: string) => {
     setAttendance((prev: WorshipAttendance[]) => prev.map((a: WorshipAttendance) => 
@@ -60,7 +82,8 @@ export function Worship() {
   };
 
   const getSlotCount = (type: 'regular' | 'base', time: string) => {
-    return attendance.filter(a => type === 'regular' ? a.regular[time] : a.base[time]).length;
+    // calculate stats ONLY based on the currently filtered team
+    return filteredAttendance.filter(a => type === 'regular' ? a.regular[time] : a.base[time]).length;
   };
 
   if (showDetailed) {
@@ -81,16 +104,56 @@ export function Worship() {
 
         {/* Detailed Attendance Table (Existing Table Code) */}
         <div style={{ background: 'var(--surface-lowest)', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-ambient)', overflow: 'hidden' }}>
+          
+          {/* Controls Bar */}
           <div style={{ padding: '24px 24px 16px', borderBottom: '1px solid var(--outline-variant)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
             <h3 style={{ fontSize: '18px', fontWeight: 800, color: 'var(--on-surface)' }}>상세 출석부 (정규+거점)</h3>
-            <div style={{ position: 'relative', width: '240px' }}>
-              <Search size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--secondary)' }} />
-              <input 
-                placeholder="이름 또는 팀 검색..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                style={{ width: '100%', padding: '8px 12px 8px 36px', borderRadius: 'var(--radius-md)', border: '1.5px solid var(--outline-variant)', fontSize: '14px', outline: 'none' }} 
-              />
+            
+            <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+              {/* Month Selector */}
+              <select
+                value={selectedMonth}
+                onChange={(e) => setSelectedMonth(e.target.value)}
+                style={{ padding: '8px 12px', borderRadius: 'var(--radius-md)', border: '1.5px solid var(--outline-variant)', fontSize: '14px', outline: 'none', background: 'white' }}
+              >
+                <option value="2026-04">2026년 4월</option>
+                <option value="2026-05">2026년 5월</option>
+                <option value="2026-06">2026년 6월</option>
+              </select>
+
+              {/* Week Selector */}
+              <select
+                value={selectedWeek}
+                onChange={(e) => setSelectedWeek(e.target.value)}
+                style={{ padding: '8px 12px', borderRadius: 'var(--radius-md)', border: '1.5px solid var(--outline-variant)', fontSize: '14px', outline: 'none', background: 'white' }}
+              >
+                {[1, 2, 3, 4, 5].map(w => (
+                  <option key={w} value={`${w}주차`}>{w}주차</option>
+                ))}
+              </select>
+
+              {/* Team Selector */}
+              <select
+                value={selectedTeam}
+                onChange={(e) => setSelectedTeam(e.target.value)}
+                disabled={!isMaster}
+                style={{ padding: '8px 12px', borderRadius: 'var(--radius-md)', border: '1.5px solid var(--outline-variant)', fontSize: '14px', outline: 'none', background: isMaster ? 'white' : 'var(--surface-low)', cursor: isMaster ? 'pointer' : 'not-allowed' }}
+              >
+                {isMaster && <option value="전체">전체 (모든 팀)</option>}
+                <option value="보라팀">보라팀</option>
+                <option value="해봄팀">해봄팀</option>
+                <option value="이음팀">이음팀</option>
+              </select>
+
+              <div style={{ position: 'relative', width: '200px' }}>
+                <Search size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--secondary)' }} />
+                <input 
+                  placeholder="이름 검색..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  style={{ width: '100%', padding: '8px 12px 8px 36px', borderRadius: 'var(--radius-md)', border: '1.5px solid var(--outline-variant)', fontSize: '14px', outline: 'none' }} 
+                />
+              </div>
             </div>
           </div>
 

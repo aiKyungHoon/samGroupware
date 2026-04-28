@@ -47,7 +47,7 @@ function Modal({ title, subtitle, onClose, children }: {
 }
 
 /* ─────────── Main Component ─────────── */
-export function OrgChart() {
+export function OrgChart({ team }: { team?: string }) {
   const [jeondo, setJeondo] = useState<NamedRole[]>([]);
   const [nalgae, setNalgae] = useState<NamedRole[]>([]);
   const [teams, setTeams] = useState<TeamData[]>([]);
@@ -96,22 +96,25 @@ export function OrgChart() {
       let foundImwon = '미정';
 
       rows.forEach(row => {
-        const [category, teamName, area, role, name] = row;
+        let [category, teamName, area, role, name] = row;
         if (!name) return;
 
-        if (category === '전도') newJeondo.push({ role, name });
-        if (category === '날개') newNalgae.push({ role, name });
-        if (category === '임원') foundImwon = name;
+        // "양때" 이거나 비어있으면 팀으로만 배정.
+        // "전도", "날개"일 때만 상단 위원회/특수 직분으로 추가
+        if (category.includes('전도') || role.includes('전도')) newJeondo.push({ role, name });
+        if (category.includes('날개') || role.includes('날개')) newNalgae.push({ role, name });
+        if (category.includes('임원') || role.includes('임원')) foundImwon = name;
 
-        if (teamName) {
+        if (teamName && teamName !== '-') {
           if (!teamMap[teamName]) teamMap[teamName] = new Set();
-          if (area) teamMap[teamName].add(area);
+          if (area && area !== '-') teamMap[teamName].add(area);
           
-          if (role.includes('팀장')) {
+          const rolesArray = role.split(',').map(r => r.trim());
+          if (rolesArray.includes('팀장') || rolesArray.includes('양때 팀장')) {
             teamLeaders[teamName] = name;
           }
 
-          if (area) {
+          if (area && area !== '-') {
             const key = areaKey(teamName, area);
             if (!newAreaMembers[key]) newAreaMembers[key] = [];
             newAreaMembers[key].push({ name, role });
@@ -158,9 +161,116 @@ export function OrgChart() {
 
   const totalMembers = Object.values(areaMembers).flat().length;
 
+  // === TEAM SPECIFIC VIEW ===
+  if (team) {
+    const teamData = teams.find(t => t.name === team);
+    
+    if (loading) return <div style={{ padding: '40px', textAlign: 'center', color: 'var(--secondary)' }}>로딩 중...</div>;
+    if (error) return <div style={{ padding: '40px', textAlign: 'center', color: '#ef4444' }}>에러: {error}</div>;
+    if (!teamData) return <div style={{ padding: '40px', textAlign: 'center', color: 'var(--secondary)' }}>팀 데이터를 찾을 수 없습니다.</div>;
+
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', padding: '16px 0' }}>
+        {/* Team Header Box */}
+        <div style={{ background: teamData.bgColor, padding: '32px', borderRadius: '16px', textAlign: 'center', border: `1px solid ${teamData.color}30` }}>
+           <div style={{ fontSize: '15px', color: teamData.color, fontWeight: 700, marginBottom: '8px' }}>{teamData.name}</div>
+           <div style={{ fontSize: '28px', fontWeight: 800, color: 'var(--on-surface)' }}>
+             {teamData.leader} <span style={{ fontSize: '16px', color: 'var(--secondary)' }}>팀장</span>
+           </div>
+           <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: 'white', color: teamData.color, padding: '8px 16px', borderRadius: 'var(--radius-full)', fontSize: '13px', fontWeight: 700, marginTop: '16px', boxShadow: '0 2px 8px rgba(0,0,0,0.05)' }}>
+             <Users size={16} /> 팀 인원: 총 {teamData.count}명
+           </div>
+        </div>
+
+        {/* Areas Grid */}
+        <div className="responsive-grid-3">
+          {teamData.areas.map((area, aIdx) => {
+            const members = areaMembers[areaKey(teamData.name.replace('팀',''), area)] || [];
+            const leader = members.find(m => m.role && m.role.includes('구역장'));
+            const normals = members.filter(m => !(m.role && m.role.includes('구역장')));
+
+            return (
+              <div key={aIdx} style={{ 
+                background: 'white', 
+                borderRadius: '16px', 
+                border: `1px solid var(--outline-variant)`, 
+                padding: '24px', 
+                textAlign: 'center', 
+                boxShadow: '0 4px 12px rgba(0,0,0,0.03)',
+                transition: 'transform 0.2s',
+              }}
+              onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-4px)'}
+              onMouseLeave={e => e.currentTarget.style.transform = 'translateY(0)'}
+              >
+                <div style={{ fontSize: '18px', fontWeight: 800, color: 'var(--on-surface)', marginBottom: '4px' }}>
+                  {area}
+                </div>
+                <div style={{ fontSize: '12px', color: 'var(--secondary)', marginBottom: '20px' }}>
+                  총 {members.length}명
+                </div>
+                
+                {/* 구역장 표시 */}
+                {leader && (
+                  <div style={{ 
+                    background: teamData.bgColor, 
+                    color: teamData.color, 
+                    padding: '10px', 
+                    borderRadius: '10px', 
+                    fontWeight: 800, 
+                    marginBottom: '12px', 
+                    fontSize: '15px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '6px'
+                  }}>
+                    {leader.name} <span style={{ fontSize: '12px', opacity: 0.8, fontWeight: 600 }}>{leader.role}</span>
+                  </div>
+                )}
+                {!leader && members.length > 0 && (
+                   <div style={{ fontSize: '12px', color: '#ef4444', marginBottom: '12px', fontWeight: 600 }}>
+                     구역장 공석
+                   </div>
+                )}
+
+                {/* 구역원 목록 */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  {normals.map((m, mIdx) => (
+                    <div key={mIdx} style={{ 
+                      background: 'var(--surface-lowest)', 
+                      padding: '10px', 
+                      borderRadius: '8px', 
+                      fontSize: '14px', 
+                      border: '1px solid var(--outline-variant)',
+                      display: 'flex',
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                      gap: '6px'
+                    }}>
+                      <span style={{ fontWeight: 600, color: 'var(--on-surface)' }}>{m.name}</span>
+                      {m.role && m.role !== '구역원' && (
+                        <span style={{ fontSize: '11px', color: 'var(--secondary)', fontWeight: 600 }}>{m.role}</span>
+                      )}
+                    </div>
+                  ))}
+                  {members.length === 0 && (
+                    <div style={{ fontSize: '13px', color: 'var(--secondary)', padding: '12px', border: '1px dashed var(--outline-variant)', borderRadius: '8px' }}>
+                      구역원 없음
+                    </div>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    );
+  }
+
+  // === GLOBAL VIEW ===
   return (
-    <div style={{ padding: '32px 16px', background: 'var(--surface)', flex: 1, overflowY: 'auto' }}>
-      <header style={{ maxWidth: '1000px', margin: '0 auto 48px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+    <div style={{ padding: '32px 16px', background: 'var(--surface)', flex: 1, overflowY: 'auto', overflowX: 'hidden' }}>
+      <header style={{ maxWidth: '1000px', margin: '0 auto 48px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '16px' }}>
         <div>
           <h1 style={{ fontSize: '28px', color: 'var(--on-surface)', fontWeight: 800, letterSpacing: '-0.02em' }}>상암 조직도</h1>
           <p style={{ color: 'var(--secondary)', fontSize: '15px', marginTop: '4px' }}>
@@ -250,24 +360,28 @@ export function OrgChart() {
 
         {/* Team Cards */}
         <div className="responsive-grid-3" style={{ width: '100%', paddingBottom: '40px' }}>
-          {teams.map((team, idx) => (
-            <div key={idx} style={{ background: 'var(--surface-lowest)', padding: '24px', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-ambient)', borderTop: `6px solid ${team.color}` }}>
+          {teams.map((teamData, idx) => (
+            <div key={idx} style={{ background: 'var(--surface-lowest)', padding: '24px', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-ambient)', borderTop: `6px solid ${teamData.color}` }}>
               <div style={{ textAlign: 'center', marginBottom: '24px' }}>
-                <div style={{ fontSize: '14px', color: 'var(--secondary)', fontWeight: 600, marginBottom: '4px' }}>{team.name}</div>
-                <div style={{ fontSize: '24px', fontWeight: 800 }}>{team.leader} <span style={{ fontSize: '14px', color: 'var(--secondary)' }}>팀장</span></div>
-                <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: team.bgColor, color: team.color, padding: '6px 14px', borderRadius: 'var(--radius-full)', fontSize: '12px', fontWeight: 700, marginTop: '12px' }}>
-                  <Users size={14} /> 팀 인원: 총 {team.count}명
+                <div style={{ fontSize: '14px', color: 'var(--secondary)', fontWeight: 600, marginBottom: '4px' }}>{teamData.name}</div>
+                <div style={{ fontSize: '24px', fontWeight: 800 }}>{teamData.leader} <span style={{ fontSize: '14px', color: 'var(--secondary)' }}>팀장</span></div>
+                <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: teamData.bgColor, color: teamData.color, padding: '6px 14px', borderRadius: 'var(--radius-full)', fontSize: '12px', fontWeight: 700, marginTop: '12px' }}>
+                  <Users size={14} /> 팀 인원: 총 {teamData.count}명
                 </div>
               </div>
+              
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                {team.areas.map((area, aIdx) => (
-                  <div key={aIdx} onClick={() => setSelectedArea({ teamName: team.name, areaName: area, color: team.color })} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 16px', background: 'var(--surface-low)', borderRadius: 'var(--radius-md)', fontSize: '14px', fontWeight: 700, cursor: 'pointer', transition: 'background 0.2s' }} onMouseEnter={e => e.currentTarget.style.background = 'var(--surface-high)'} onMouseLeave={e => e.currentTarget.style.background = 'var(--surface-low)'}>
-                    <span>{area}</span>
-                    <span style={{ fontSize: '12px', color: 'var(--secondary)', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                      구역원 등록 <ChevronRight size={14} />
-                    </span>
-                  </div>
-                ))}
+                {teamData.areas.map((area, aIdx) => {
+                  const members = areaMembers[areaKey(teamData.name.replace('팀',''), area)] || [];
+                  return (
+                    <div key={aIdx} onClick={() => setSelectedArea({ teamName: teamData.name, areaName: area, color: teamData.color })} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 16px', background: 'var(--surface-low)', borderRadius: 'var(--radius-md)', fontSize: '14px', fontWeight: 700, cursor: 'pointer', transition: 'background 0.2s' }} onMouseEnter={e => e.currentTarget.style.background = 'var(--surface-high)'} onMouseLeave={e => e.currentTarget.style.background = 'var(--surface-low)'}>
+                      <span>{area}</span>
+                      <span style={{ fontSize: '12px', color: 'var(--secondary)', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                        총 {members.length}명 <ChevronRight size={14} />
+                      </span>
+                    </div>
+                  );
+                })}
               </div>
             </div>
           ))}

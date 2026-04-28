@@ -4,6 +4,7 @@ import { AlertCircle, CheckCircle2, AlertTriangle, TrendingUp, Users, HeartHands
 
 interface DashboardProps {
   onTabChange: (tab: string) => void;
+  team?: string;
 }
 
 const healthMetrics = [
@@ -163,18 +164,58 @@ const correlationDataOptions: Record<string, ChartDataOption> = {
   }
 };
 
-export function Dashboard({ onTabChange }: DashboardProps) {
+export function Dashboard({ onTabChange, team }: DashboardProps) {
   const [correlationType, setCorrelationType] = useState('visit_worship');
   const currentChart = correlationDataOptions[correlationType];
 
   return (
-    <div style={{ padding: '32px', flex: 1, overflowY: 'auto' }}>
-      <header style={{ marginBottom: '32px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-        <div>
-          <h1 style={{ fontSize: '28px', color: 'var(--on-surface)', letterSpacing: '-0.02em', fontWeight: 800 }}>마스터 컨트롤 타워 (Dashboard)</h1>
-          <p style={{ color: 'var(--secondary)', fontSize: '15px', marginTop: '4px' }}>교구 사역 현황을 한눈에 파악하고 전략적으로 관리합니다.</p>
+    <div className="dashboard-container" style={{ flex: 1, overflowY: 'auto' }}>
+      {/* Master Only Header */}
+      {!team && (
+        <header style={{ marginBottom: '32px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+          <div>
+            <h1 style={{ fontSize: '28px', color: 'var(--on-surface)', letterSpacing: '-0.02em', fontWeight: 800 }}>
+              마스터 컨트롤 타워 (Dashboard)
+            </h1>
+            <p style={{ color: 'var(--secondary)', fontSize: '15px', marginTop: '4px' }}>
+              상암지역 전체 사역 현황을 한눈에 파악하고 전략적으로 관리합니다.
+            </p>
+          </div>
+        </header>
+      )}
+
+      {/* Team Only Summary Banner */}
+      {team && (
+        <div style={{ 
+          background: 'linear-gradient(135deg, var(--primary) 0%, var(--primary-container) 100%)', 
+          borderRadius: 'var(--radius-lg)', 
+          padding: '24px', 
+          color: 'white', 
+          marginBottom: '32px',
+          boxShadow: 'var(--shadow-ambient)' 
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '20px' }}>
+            <div style={{ background: 'rgba(255,255,255,0.2)', padding: '8px', borderRadius: '12px', display: 'flex' }}>
+              <TrendingUp size={24} color="white" />
+            </div>
+            <div>
+              <h2 style={{ fontSize: '18px', fontWeight: 800, margin: 0 }}>{team} 이번 주 핵심 달성도</h2>
+              <p style={{ fontSize: '13px', opacity: 0.8, margin: 0, marginTop: '4px' }}>팀 목표치 대비 우수한 성장을 보이고 있습니다.</p>
+            </div>
+          </div>
+          <div style={{ display: 'flex', gap: '24px', alignItems: 'flex-end', flexWrap: 'wrap' }}>
+            <div>
+              <div style={{ fontSize: '13px', opacity: 0.8, marginBottom: '4px', fontWeight: 600 }}>종합 평가 점수</div>
+              <div style={{ fontSize: '36px', fontWeight: 800, lineHeight: 1 }}>92<span style={{ fontSize: '18px', opacity: 0.8, fontWeight: 600 }}>점</span></div>
+            </div>
+            <div className="desktop-only" style={{ width: '1px', height: '40px', background: 'rgba(255,255,255,0.2)' }}></div>
+            <div>
+              <div style={{ fontSize: '13px', opacity: 0.8, marginBottom: '4px', fontWeight: 600 }}>최우수 성장 지표</div>
+              <div style={{ fontSize: '16px', fontWeight: 700, background: 'rgba(255,255,255,0.15)', padding: '6px 12px', borderRadius: '8px' }}>구역예배 실시율 (88.1%)</div>
+            </div>
+          </div>
         </div>
-      </header>
+      )}
 
       {/* Categorized Health Indicators */}
       <div style={{ marginBottom: '40px' }}>
@@ -184,9 +225,9 @@ export function Dashboard({ onTabChange }: DashboardProps) {
           <div style={{ flex: '1 1 500px' }}>
             <h3 style={{ fontSize: '14px', fontWeight: 700, color: 'var(--secondary)', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
               <span style={{ width: '4px', height: '14px', background: 'var(--primary)', borderRadius: '2px' }}></span>
-              사역 성장 지표 (Growing)
+              {team ? `${team} 성장 지표 (Growing)` : '사역 성장 지표 (Growing)'}
             </h3>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '16px' }}>
+            <div className="responsive-grid-3" style={{ gap: '16px' }}>
               {healthMetrics.filter(m => m.category === 'growing').map((metric) => (
                 <MetricCard key={metric.id} metric={metric} onClick={() => onTabChange(metric.target || metric.id)} />
               ))}
@@ -197,9 +238,9 @@ export function Dashboard({ onTabChange }: DashboardProps) {
           <div style={{ flex: '1 1 350px' }}>
             <h3 style={{ fontSize: '14px', fontWeight: 700, color: 'var(--secondary)', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
               <span style={{ width: '4px', height: '14px', background: 'var(--tertiary)', borderRadius: '2px' }}></span>
-              성도 돌봄 지표 (Caring)
+              {team ? `${team} 돌봄 지표 (Caring)` : '성도 돌봄 지표 (Caring)'}
             </h3>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '16px' }}>
+            <div className="responsive-grid-2" style={{ gap: '16px' }}>
               {healthMetrics.filter(m => m.category === 'caring').map((metric) => (
                 <MetricCard key={metric.id} metric={metric} onClick={() => onTabChange(metric.target || metric.id)} />
               ))}
@@ -227,8 +268,8 @@ export function Dashboard({ onTabChange }: DashboardProps) {
           <p style={{ fontSize: '13px', color: 'var(--secondary)', marginBottom: '24px' }}>
             {currentChart.desc}
           </p>
-          <div style={{ height: '300px' }}>
-            <ResponsiveContainer width="100%" height="100%">
+          <div style={{ height: '300px', width: '100%', minWidth: 0 }}>
+            <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={300}>
               <ComposedChart data={currentChart.data}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--outline-variant)" opacity={0.3} />
                 <XAxis dataKey="name" axisLine={false} tickLine={false} fontSize={12} />
