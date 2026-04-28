@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { Dashboard } from './Dashboard';
 import { OrgChart } from './OrgChart';
 import { Worship } from './Worship';
-import { Education } from './Education';
 
 interface TeamManagementProps {
   teamName: string;

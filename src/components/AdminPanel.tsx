@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Shield, Check, X, User } from 'lucide-react';
 import { collection, getDocs, doc, updateDoc } from 'firebase/firestore';
 import { firestore } from '../firebase';
@@ -156,22 +156,30 @@ export function AdminPanel() {
                     </div>
                   </td>
                   <td style={{ padding: '16px', display: 'flex', gap: '8px' }}>
-                    {u.status !== 'approved' && (
-                      <button 
-                        onClick={() => handleUpdateStatus(u.id, 'approved')}
-                        style={{ padding: '6px 12px', background: 'var(--primary)', color: 'white', border: 'none', borderRadius: 'var(--radius-md)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px', fontSize: '13px', fontWeight: 600 }}
-                      >
-                        <Check size={14} /> 승인
-                      </button>
-                    )}
-                    {u.status !== 'rejected' && user.uid !== u.uid && (
+                    <div style={{ display: 'flex', gap: '8px' }}>
+                      {u.status !== 'approved' && (
+                        <button
+                          onClick={() => handleUpdateStatus(u.id, 'approved')}
+                          style={{
+                            background: 'var(--primary)', color: 'white', border: 'none',
+                            padding: '4px 8px', borderRadius: 'var(--radius-md)', cursor: user?.uid === u.uid ? 'not-allowed' : 'pointer',
+                            fontSize: '13px'
+                          }}
+                          disabled={user?.uid === u.uid}
+                        >
+                          승인
+                        </button>
+                      )}
+                      
+                      {u.status !== 'rejected' && user?.uid !== u.uid && (
                       <button 
                         onClick={() => handleUpdateStatus(u.id, 'rejected')}
                         style={{ padding: '6px 12px', background: '#fee2e2', color: '#b91c1c', border: 'none', borderRadius: 'var(--radius-md)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px', fontSize: '13px', fontWeight: 600 }}
                       >
                         <X size={14} /> 거절
                       </button>
-                    )}
+                      )}
+                    </div>
                   </td>
                 </tr>
               ))}
