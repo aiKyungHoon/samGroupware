@@ -48,7 +48,7 @@ export function Worship({ user, teamName }: { user?: any; teamName?: string }) {
   const [selectedTeam, setSelectedTeam] = useState(initialTeam);
 
   const [attendance, setAttendance] = useState<WorshipAttendance[]>(globalWorshipAttendance);
-  const [loading, setLoading] = useState(!worshipDataLoaded);
+  // const [loading, setLoading] = useState(!worshipDataLoaded); // Removed unused state
 
   useEffect(() => {
     if (worshipDataLoaded) return;
@@ -84,10 +84,10 @@ export function Worship({ user, teamName }: { user?: any; teamName?: string }) {
         globalWorshipAttendance = newAttendance;
         worshipDataLoaded = true;
         setAttendance(newAttendance);
-        setLoading(false);
+        // setLoading(false);
       } catch (err) {
         console.error(err);
-        setLoading(false);
+        // setLoading(false);
       }
     };
     fetchCSV();

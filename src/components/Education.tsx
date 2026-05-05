@@ -26,8 +26,6 @@ export function Education({ user, teamName }: { user?: any; teamName?: string })
   const [searchTerm, setSearchTerm] = useState('');
   
   // Date & Team Selectors State
-  const [selectedMonth, setSelectedMonth] = useState('2026-05');
-  const [selectedWeek, setSelectedWeek] = useState('1주차');
   const [selectedCell, setSelectedCell] = useState('전체');
   
   // Compute allowed teams for this user
@@ -40,7 +38,7 @@ export function Education({ user, teamName }: { user?: any; teamName?: string })
     else if (roles.includes('team_haebom')) initialTeam = '해봄팀';
     else if (roles.includes('team_ieum')) initialTeam = '이음팀';
   }
-  const [selectedTeam, setSelectedTeam] = useState(initialTeam);
+  const selectedTeam = initialTeam;
 
   const [attendance, setAttendance] = useState<EducationAttendance[]>(globalEducationAttendance);
   const [loading, setLoading] = useState(!educationDataLoaded);

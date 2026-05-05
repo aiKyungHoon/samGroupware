@@ -22,7 +22,7 @@ export function TeamWeeklyChecklist({ teamName, type }: TeamWeeklyChecklistProps
   
   const [membersList, setMembersList] = useState(globalMembers);
   const [checkedData, setCheckedData] = useState(globalCheckedData);
-  const [loading, setLoading] = useState(!globalMembersLoaded);
+  // const [loading, setLoading] = useState(!globalMembersLoaded); // Removed unused state
 
   useEffect(() => {
     if (globalMembersLoaded) {
@@ -58,10 +58,10 @@ export function TeamWeeklyChecklist({ teamName, type }: TeamWeeklyChecklistProps
         globalMembers = members;
         globalMembersLoaded = true;
         setMembersList(members);
-        setLoading(false);
+        // setLoading(false);
       } catch (err) {
         console.error(err);
-        setLoading(false);
+        // setLoading(false);
       }
     };
     fetchCSV();
