@@ -91,12 +91,12 @@ export function Auth({ onLoginSuccess }: AuthProps) {
         id,
         name,
         nickname,
-        status: 'pending',
+        status: 'approved',
         role: 'user',
         createdAt: new Date().toISOString()
       });
 
-      alert('가입 신청이 완료되었습니다! 관리자 승인 후 이용 가능합니다.');
+      alert('가입이 완료되었습니다! 특정 메뉴를 이용하려면 관리자에게 권한 부여를 요청해 주세요.');
       setIsLogin(true);
     } catch (err: any) {
       if (err.code === 'auth/email-already-in-use') {

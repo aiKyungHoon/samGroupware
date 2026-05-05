@@ -5,9 +5,10 @@ import { AlertCircle, CheckCircle2, AlertTriangle, TrendingUp, Users, HeartHands
 interface DashboardProps {
   onTabChange: (tab: string) => void;
   team?: string;
+  visibleMetricIds?: string[];
 }
 
-const healthMetrics = [
+export const healthMetrics = [
   { 
     id: 'worship', 
     title: '예배 출석률', 
@@ -164,12 +165,37 @@ const correlationDataOptions: Record<string, ChartDataOption> = {
   }
 };
 
-export function Dashboard({ onTabChange, team }: DashboardProps) {
+export function Dashboard({ onTabChange, team, visibleMetricIds }: DashboardProps) {
   const [correlationType, setCorrelationType] = useState('visit_worship');
   const currentChart = correlationDataOptions[correlationType];
 
+  const [selectedMonth, setSelectedMonth] = useState('2026-05');
+  const [selectedWeek, setSelectedWeek] = useState('1주차');
+
   return (
     <div className="dashboard-container" style={{ flex: 1, overflowY: 'auto' }}>
+      {/* Date Selectors (Common for both Master and Team) */}
+      <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginBottom: '16px', padding: '0 2px' }}>
+        <select 
+          value={selectedMonth} 
+          onChange={(e) => setSelectedMonth(e.target.value)}
+          style={{ padding: '8px 16px', borderRadius: 'var(--radius-md)', border: '1px solid var(--outline-variant)', background: 'white', fontWeight: 600 }}
+        >
+          {[...Array(12)].map((_, i) => (
+            <option key={i} value={`2026-${String(i+1).padStart(2, '0')}`}>2026년 {i+1}월</option>
+          ))}
+        </select>
+        <select 
+          value={selectedWeek} 
+          onChange={(e) => setSelectedWeek(e.target.value)}
+          style={{ padding: '8px 16px', borderRadius: 'var(--radius-md)', border: '1px solid var(--outline-variant)', background: 'white', fontWeight: 600 }}
+        >
+          {[1,2,3,4,5].map(w => (
+            <option key={w} value={`${w}주차`}>{w}주차</option>
+          ))}
+        </select>
+      </div>
+
       {/* Master Only Header */}
       {!team && (
         <header style={{ marginBottom: '32px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
@@ -228,9 +254,12 @@ export function Dashboard({ onTabChange, team }: DashboardProps) {
               {team ? `${team} 성장 지표 (Growing)` : '사역 성장 지표 (Growing)'}
             </h3>
             <div className="responsive-grid-3" style={{ gap: '16px' }}>
-              {healthMetrics.filter(m => m.category === 'growing').map((metric) => (
-                <MetricCard key={metric.id} metric={metric} onClick={() => onTabChange(metric.target || metric.id)} />
-              ))}
+              {healthMetrics
+                .filter(m => m.category === 'growing')
+                .filter(m => !visibleMetricIds || visibleMetricIds.includes(m.id))
+                .map((metric) => (
+                  <MetricCard key={metric.id} metric={metric} onClick={() => onTabChange(metric.target || metric.id)} />
+                ))}
             </div>
           </div>
 
@@ -241,9 +270,12 @@ export function Dashboard({ onTabChange, team }: DashboardProps) {
               {team ? `${team} 돌봄 지표 (Caring)` : '성도 돌봄 지표 (Caring)'}
             </h3>
             <div className="responsive-grid-2" style={{ gap: '16px' }}>
-              {healthMetrics.filter(m => m.category === 'caring').map((metric) => (
-                <MetricCard key={metric.id} metric={metric} onClick={() => onTabChange(metric.target || metric.id)} />
-              ))}
+              {healthMetrics
+                .filter(m => m.category === 'caring')
+                .filter(m => !visibleMetricIds || visibleMetricIds.includes(m.id))
+                .map((metric) => (
+                  <MetricCard key={metric.id} metric={metric} onClick={() => onTabChange(metric.target || metric.id)} />
+                ))}
             </div>
           </div>
 

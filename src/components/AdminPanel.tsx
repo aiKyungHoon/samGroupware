@@ -14,7 +14,14 @@ export function AdminPanel() {
     try {
       const usersRef = collection(firestore, 'users');
       const snapshot = await getDocs(usersRef);
-      const usersList = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      const usersList = snapshot.docs.map(doc => {
+        const data = doc.data();
+        return {
+          ...data,
+          docId: doc.id,
+          loginId: data.id || doc.id
+        };
+      });
       setUsers(usersList);
     } catch (err) {
       console.error('Failed to fetch users:', err);
@@ -28,11 +35,12 @@ export function AdminPanel() {
   }, []);
 
   const handleUpdateStatus = async (userId: string, newStatus: string) => {
+    if (!userId) return;
     if (!window.confirm(`이 사용자를 ${newStatus === 'approved' ? '승인' : '거절'}하시겠습니까?`)) return;
     try {
       const userRef = doc(firestore, 'users', userId);
       await updateDoc(userRef, { status: newStatus });
-      setUsers(users.map(u => u.id === userId ? { ...u, status: newStatus } : u));
+      setUsers(users.map(u => u.docId === userId ? { ...u, status: newStatus } : u));
     } catch (err) {
       console.error('Failed to update status:', err);
       alert('상태 업데이트에 실패했습니다.');
@@ -52,6 +60,7 @@ export function AdminPanel() {
   ];
 
   const handleToggleRole = async (userId: string, currentRoles: string[], roleId: string) => {
+    if (!userId) return;
     let newRoles = [...(currentRoles || [])];
     if (newRoles.includes(roleId)) {
       newRoles = newRoles.filter(r => r !== roleId);
@@ -62,7 +71,7 @@ export function AdminPanel() {
     try {
       const userRef = doc(firestore, 'users', userId);
       await updateDoc(userRef, { roles: newRoles, role: newRoles.includes('master') ? 'admin' : 'user' }); // Backward compatibility
-      setUsers(users.map(u => u.id === userId ? { ...u, roles: newRoles, role: newRoles.includes('master') ? 'admin' : 'user' } : u));
+      setUsers(users.map(u => u.docId === userId ? { ...u, roles: newRoles, role: newRoles.includes('master') ? 'admin' : 'user' } : u));
     } catch (err) {
       console.error('Failed to update role:', err);
       alert('권한 업데이트에 실패했습니다.');
@@ -113,14 +122,14 @@ export function AdminPanel() {
             </thead>
             <tbody>
               {users.map(u => (
-                <tr key={u.id} style={{ borderBottom: '1px solid var(--outline-variant)' }}>
+                <tr key={u.docId} style={{ borderBottom: '1px solid var(--outline-variant)' }}>
                   <td style={{ padding: '16px', fontWeight: 600 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                       <User size={16} color="var(--secondary)" />
                       {u.name} <span style={{ color: 'var(--secondary)', fontWeight: 400, fontSize: '13px' }}>({u.nickname || '미설정'})</span>
                     </div>
                   </td>
-                  <td style={{ padding: '16px', color: 'var(--secondary)', fontSize: '14px' }}>{u.id}</td>
+                  <td style={{ padding: '16px', color: 'var(--secondary)', fontSize: '14px' }}>{u.loginId}</td>
                   <td style={{ padding: '16px' }}>
                     {u.status === 'pending' ? (
                       <span style={{ background: '#fef08a', color: '#854d0e', padding: '4px 10px', borderRadius: 'var(--radius-full)', fontSize: '12px', fontWeight: 700 }}>대기중</span>
@@ -146,7 +155,7 @@ export function AdminPanel() {
                               type="checkbox" 
                               checked={isChecked} 
                               disabled={user?.uid === u.uid}
-                              onChange={() => handleToggleRole(u.id, u.roles || (u.role === 'admin' ? ['master'] : []), role.id)}
+                              onChange={() => handleToggleRole(u.docId, u.roles || (u.role === 'admin' ? ['master'] : []), role.id)}
                               style={{ display: 'none' }}
                             />
                             {role.label}
@@ -159,7 +168,7 @@ export function AdminPanel() {
                     <div style={{ display: 'flex', gap: '8px' }}>
                       {u.status !== 'approved' && (
                         <button
-                          onClick={() => handleUpdateStatus(u.id, 'approved')}
+                          onClick={() => handleUpdateStatus(u.docId, 'approved')}
                           style={{
                             background: 'var(--primary)', color: 'white', border: 'none',
                             padding: '4px 8px', borderRadius: 'var(--radius-md)', cursor: user?.uid === u.uid ? 'not-allowed' : 'pointer',
@@ -173,7 +182,7 @@ export function AdminPanel() {
                       
                       {u.status !== 'rejected' && user?.uid !== u.uid && (
                       <button 
-                        onClick={() => handleUpdateStatus(u.id, 'rejected')}
+                        onClick={() => handleUpdateStatus(u.docId, 'rejected')}
                         style={{ padding: '6px 12px', background: '#fee2e2', color: '#b91c1c', border: 'none', borderRadius: 'var(--radius-md)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px', fontSize: '13px', fontWeight: 600 }}
                       >
                         <X size={14} /> 거절
