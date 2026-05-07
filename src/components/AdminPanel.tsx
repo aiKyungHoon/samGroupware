@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Shield, X, User } from 'lucide-react';
-import { collection, getDocs, doc, updateDoc } from 'firebase/firestore';
+import { collection, getDocs, doc, updateDoc, deleteDoc } from 'firebase/firestore';
 import { firestore } from '../firebase';
 import { useAuth } from '../hooks/useAuth';
 
@@ -47,6 +47,20 @@ export function AdminPanel() {
     }
   };
 
+  const handleDeleteUser = async (userId: string) => {
+    if (!userId) return;
+    if (!window.confirm('이 사용자를 정말로 퇴출하시겠습니까?\n이 작업은 되돌릴 수 없으며 사용자의 프로필 정보가 영구 삭제됩니다.')) return;
+    try {
+      const userRef = doc(firestore, 'users', userId);
+      await deleteDoc(userRef);
+      setUsers(users.filter(u => u.docId !== userId));
+      alert('사용자가 퇴출되었습니다.');
+    } catch (err) {
+      console.error('Failed to delete user:', err);
+      alert('사용자 삭제에 실패했습니다.');
+    }
+  };
+
   const AVAILABLE_ROLES = [
     { id: 'master', label: '마스터(전체)' },
     { id: 'team_bora', label: '보라팀' },
@@ -57,6 +71,7 @@ export function AdminPanel() {
     { id: 'menu_evangelism', label: '전도관리' },
     { id: 'menu_accounting', label: '회계관리' },
     { id: 'menu_visits', label: '심방관리' },
+    { id: 'menu_dashboard', label: '지표관리(대시보드)' },
   ];
 
   const handleToggleRole = async (userId: string, currentRoles: string[], roleId: string) => {
@@ -78,7 +93,7 @@ export function AdminPanel() {
     }
   };
 
-  const ADMIN_ROLES = ['master', 'menu_worship', 'menu_education', 'menu_evangelism', 'menu_accounting', 'menu_visits'];
+  const ADMIN_ROLES = ['master', 'menu_worship', 'menu_education', 'menu_evangelism', 'menu_accounting', 'menu_visits', 'menu_dashboard'];
   const hasAdminAccess = user?.id === 'admin' || user?.role === 'admin' || (user?.roles || []).some((r: string) => ADMIN_ROLES.includes(r));
 
   if (!hasAdminAccess) {
@@ -183,10 +198,19 @@ export function AdminPanel() {
                       {u.status !== 'rejected' && user?.uid !== u.uid && (
                       <button 
                         onClick={() => handleUpdateStatus(u.docId, 'rejected')}
-                        style={{ padding: '6px 12px', background: '#fee2e2', color: '#b91c1c', border: 'none', borderRadius: 'var(--radius-md)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px', fontSize: '13px', fontWeight: 600 }}
+                        style={{ padding: '6px 12px', background: '#fff7ed', color: '#c2410c', border: 'none', borderRadius: 'var(--radius-md)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px', fontSize: '13px', fontWeight: 600 }}
                       >
                         <X size={14} /> 거절
                       </button>
+                      )}
+
+                      {user?.uid !== u.uid && (
+                        <button
+                          onClick={() => handleDeleteUser(u.docId)}
+                          style={{ padding: '6px 12px', background: '#fee2e2', color: '#b91c1c', border: 'none', borderRadius: 'var(--radius-md)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px', fontSize: '13px', fontWeight: 600 }}
+                        >
+                          <X size={14} /> 퇴출
+                        </button>
                       )}
                     </div>
                   </td>

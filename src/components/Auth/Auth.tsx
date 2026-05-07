@@ -91,7 +91,7 @@ export function Auth({ onLoginSuccess }: AuthProps) {
         id,
         name,
         nickname,
-        status: 'approved',
+        status: 'pending',
         role: 'user',
         createdAt: new Date().toISOString()
       });

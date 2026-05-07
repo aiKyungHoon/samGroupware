@@ -52,7 +52,7 @@ export function TeamManagement({ teamName, user }: TeamManagementProps) {
               {teamName}의 모든 지표와 데이터를 주차별로 관리하는 통합 페이지입니다.
             </p>
           </div>
-          {internalTab === 'dashboard' && (
+          {internalTab === 'dashboard' && (user?.roles?.includes('master') || user?.role === 'admin' || user?.id === 'admin' || user?.roles?.includes('menu_dashboard')) && (
             <button 
               onClick={() => setShowSettings(true)}
               style={{

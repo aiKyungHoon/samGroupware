@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Menu, LayoutDashboard, BookOpen, UserCheck, UserPlus, ShieldCheck, Users, Clock, LogOut, Calculator, HeartHandshake } from 'lucide-react'
+import { Menu, LayoutDashboard, BookOpen, UserCheck, UserPlus, ShieldCheck, Users, Clock, LogOut, Calculator, HeartHandshake, X } from 'lucide-react'
 import { Sidebar } from './components/Sidebar'
 import { Dashboard } from './components/Dashboard'
 import { OrgChart } from './components/OrgChart'
@@ -20,9 +20,17 @@ function App() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(window.innerWidth > 768)
 
   const renderContent = () => {
+    const roles = user?.roles || [];
+    const isMaster = roles.includes('master') || user?.role === 'admin' || user?.id === 'admin' || roles.includes('menu_dashboard');
+
     switch (activeTab) {
       case 'dashboard':
-        return <Dashboard onTabChange={setActiveTab} />;
+        return isMaster ? <Dashboard onTabChange={setActiveTab} /> : (
+          <div style={{ padding: '32px', textAlign: 'center' }}>
+            <h2 style={{ fontWeight: 800 }}>지표 접근 권한이 없습니다.</h2>
+            <p style={{ color: 'var(--secondary)', marginTop: '8px' }}>지표 관리 권한을 부여받은 후에 확인이 가능합니다.</p>
+          </div>
+        );
       case 'worship':
         return <Worship user={user} />;
       case 'education':
@@ -56,8 +64,9 @@ function App() {
     );
   }
 
-  // Show "Pending Approval" screen if logged in but not approved
-  if (user && user.status === 'pending') {
+  // Show "Pending Approval" or "Rejected" screen if logged in but not approved
+  if (user && user.status !== 'approved') {
+    const isRejected = user.status === 'rejected';
     return (
       <div style={{ 
         height: '100vh', 
@@ -79,19 +88,22 @@ function App() {
           <div style={{ 
             width: '64px', 
             height: '64px', 
-            background: 'var(--warning-container)', 
+            background: isRejected ? '#fee2e2' : 'var(--warning-container)', 
             borderRadius: 'var(--radius-lg)', 
             display: 'flex', 
             alignItems: 'center', 
             justifyContent: 'center', 
             margin: '0 auto 24px'
           }}>
-            <Clock size={32} color="var(--warning)" />
+            {isRejected ? <X size={32} color="#b91c1c" /> : <Clock size={32} color="var(--warning)" />}
           </div>
-          <h2 style={{ fontSize: '20px', fontWeight: 800, marginBottom: '12px' }}>승인 대기 중</h2>
+          <h2 style={{ fontSize: '20px', fontWeight: 800, marginBottom: '12px' }}>
+            {isRejected ? '접근이 거절되었습니다' : '승인 대기 중'}
+          </h2>
           <p style={{ color: 'var(--secondary)', marginBottom: '32px', lineHeight: 1.6 }}>
-            {user.name} 님의 사역 신청이 접수되었습니다.<br />
-            관리자가 승인한 후에 모든 기능을 이용하실 수 있습니다.
+            {isRejected 
+              ? '사역 신청이 거절되었거나 계정이 비활성화되었습니다.\n관리자에게 문의해 주세요.' 
+              : `${user.name} 님의 사역 신청이 접수되었습니다.\n관리자가 승인한 후에 모든 기능을 이용하실 수 있습니다.`}
           </p>
           <button 
             onClick={logout}
@@ -243,9 +255,11 @@ function App() {
             { id: 'accounting', icon: Calculator, label: '회계' },
             { id: 'visits', icon: HeartHandshake, label: '심방' }
           ].filter(item => {
-            if (item.id === 'dashboard' || item.id === 'orgchart') return true;
+            if (item.id === 'orgchart') return true;
             const roles = user?.roles || [];
-            if (roles.includes('master') || user?.role === 'admin') return true;
+            const isMaster = roles.includes('master') || user?.role === 'admin' || user?.id === 'admin';
+            if (item.id === 'dashboard') return roles.includes('menu_dashboard') || isMaster;
+            if (isMaster) return true;
             if (item.id === 'worship' && roles.includes('menu_worship')) return true;
             if (item.id === 'education' && roles.includes('menu_education')) return true;
             if (item.id === 'evangelism' && roles.includes('menu_evangelism')) return true;

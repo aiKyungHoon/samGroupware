@@ -46,12 +46,19 @@ export function Sidebar({
 
       <nav style={{ display: 'flex', flexDirection: 'column', gap: '8px', flex: 1 }}>
         {menuItems.filter(item => {
-          // Always show dashboard and orgchart
-          if (item.id === 'dashboard' || item.id === 'orgchart') return true;
+          // Always show orgchart
+          if (item.id === 'orgchart') return true;
+          
+          const roles = user?.roles || [];
+          const isMaster = roles.includes('master') || user?.role === 'admin' || user?.id === 'admin';
+
+          // Dashboard requires menu_dashboard or master
+          if (item.id === 'dashboard') {
+            return roles.includes('menu_dashboard') || isMaster;
+          }
           
           // Master admin sees everything
-          const roles = user?.roles || [];
-          if (roles.includes('master') || user?.role === 'admin') return true;
+          if (isMaster) return true;
           
           // Check specific menu permissions
           if (item.id === 'worship' && roles.includes('menu_worship')) return true;
@@ -95,7 +102,7 @@ export function Sidebar({
           );
         })}
         {(() => {
-          const ADMIN_ROLES = ['master', 'menu_worship', 'menu_education', 'menu_evangelism', 'menu_accounting', 'menu_visits'];
+          const ADMIN_ROLES = ['master', 'menu_worship', 'menu_education', 'menu_evangelism', 'menu_accounting', 'menu_visits', 'menu_dashboard'];
           const hasAdminAccess = user?.id === 'admin' || user?.role === 'admin' || (user?.roles || []).some((r: string) => ADMIN_ROLES.includes(r));
           
           if (!hasAdminAccess) return null;
