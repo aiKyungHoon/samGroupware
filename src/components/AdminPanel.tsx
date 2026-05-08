@@ -63,6 +63,7 @@ export function AdminPanel() {
 
   const AVAILABLE_ROLES = [
     { id: 'master', label: '마스터(전체)' },
+    { id: 'role_leader', label: '팀장' },
     { id: 'team_bora', label: '보라팀' },
     { id: 'team_haebom', label: '해봄팀' },
     { id: 'team_ieum', label: '이음팀' },
@@ -93,7 +94,7 @@ export function AdminPanel() {
     }
   };
 
-  const ADMIN_ROLES = ['master', 'menu_worship', 'menu_education', 'menu_evangelism', 'menu_accounting', 'menu_visits', 'menu_dashboard'];
+  const ADMIN_ROLES = ['master', 'role_leader', 'menu_worship', 'menu_education', 'menu_evangelism', 'menu_accounting', 'menu_visits', 'menu_dashboard'];
   const hasAdminAccess = user?.id === 'admin' || user?.role === 'admin' || (user?.roles || []).some((r: string) => ADMIN_ROLES.includes(r));
 
   if (!hasAdminAccess) {

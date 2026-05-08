@@ -52,9 +52,9 @@ export function Sidebar({
           const roles = user?.roles || [];
           const isMaster = roles.includes('master') || user?.role === 'admin' || user?.id === 'admin';
 
-          // Dashboard requires menu_dashboard or master
+          // Dashboard requires menu_dashboard, role_leader, or master
           if (item.id === 'dashboard') {
-            return roles.includes('menu_dashboard') || isMaster;
+            return roles.includes('menu_dashboard') || roles.includes('role_leader') || isMaster;
           }
           
           // Master admin sees everything

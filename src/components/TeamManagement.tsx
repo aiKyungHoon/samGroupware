@@ -52,7 +52,7 @@ export function TeamManagement({ teamName, user }: TeamManagementProps) {
               {teamName}의 모든 지표와 데이터를 주차별로 관리하는 통합 페이지입니다.
             </p>
           </div>
-          {internalTab === 'dashboard' && (user?.roles?.includes('master') || user?.role === 'admin' || user?.id === 'admin' || user?.roles?.includes('menu_dashboard')) && (
+          {internalTab === 'dashboard' && (user?.roles?.includes('master') || user?.role === 'admin' || user?.id === 'admin' || user?.roles?.includes('menu_dashboard') || user?.roles?.includes('role_leader')) && (
             <button 
               onClick={() => setShowSettings(true)}
               style={{
@@ -105,25 +105,25 @@ export function TeamManagement({ teamName, user }: TeamManagementProps) {
       {/* Internal Content Rendering */}
       <div style={{ flex: 1, overflowY: 'auto', background: 'var(--surface-lowest)', padding: '16px 20px' }}>
         {internalTab === 'dashboard' && (
-          <Dashboard team={teamName} onTabChange={() => {}} visibleMetricIds={visibleMetricIds} />
+          <Dashboard key={teamName} team={teamName} onTabChange={() => {}} visibleMetricIds={visibleMetricIds} />
         )}
         {internalTab === 'orgchart' && (
-          <OrgChart team={teamName} />
+          <OrgChart key={teamName} team={teamName} />
         )}
         {internalTab === 'worship_input' && (
-          <Worship user={user} teamName={teamName} />
+          <Worship key={teamName} user={user} teamName={teamName} />
         )}
         {internalTab === 'education_input' && (
-          <Education user={user} teamName={teamName} />
+          <Education key={teamName} user={user} teamName={teamName} />
         )}
         {internalTab === 'evangelism_input' && (
-          <TeamWeeklyChecklist teamName={teamName} type="evangelism" />
+          <TeamWeeklyChecklist key={teamName} teamName={teamName} type="evangelism" />
         )}
         {internalTab === 'accounting_input' && (
-          <TeamWeeklyChecklist teamName={teamName} type="accounting" />
+          <TeamWeeklyChecklist key={teamName} teamName={teamName} type="accounting" />
         )}
         {internalTab === 'visit_input' && (
-          <TeamWeeklyChecklist teamName={teamName} type="visit" />
+          <TeamWeeklyChecklist key={teamName} teamName={teamName} type="visit" />
         )}
       </div>
 

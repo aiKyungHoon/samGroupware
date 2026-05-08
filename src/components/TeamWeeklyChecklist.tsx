@@ -108,6 +108,17 @@ export function TeamWeeklyChecklist({ teamName, type }: TeamWeeklyChecklistProps
     setNewMemberCell('1구역');
   };
 
+  // Dynamically get available cells for the selected team
+  const availableCells = Array.from(new Set(
+    membersList
+      .filter(m => m.team === teamName)
+      .map(m => m.cell)
+  )).sort((a, b) => {
+    const aNum = parseInt(a.replace(/[^0-9]/g, '')) || 0;
+    const bNum = parseInt(b.replace(/[^0-9]/g, '')) || 0;
+    return aNum - bNum || a.localeCompare(b);
+  });
+
   const getCheckItems = () => {
     switch(type) {
       case 'worship': return [{ id: 'regular', label: '정규예배 참석' }, { id: 'base', label: '거점예배 참석' }];
@@ -262,8 +273,8 @@ export function TeamWeeklyChecklist({ teamName, type }: TeamWeeklyChecklistProps
                   onChange={(e) => setNewMemberCell(e.target.value)}
                   style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid var(--outline-variant)', fontSize: '15px' }}
                 >
-                  {[1,2,3,4,5,6,7,8,9,10].map(c => (
-                    <option key={c} value={`${c}구역`}>{c}구역</option>
+                  {availableCells.map(cell => (
+                    <option key={cell} value={cell}>{cell}</option>
                   ))}
                 </select>
               </div>

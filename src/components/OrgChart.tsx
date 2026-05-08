@@ -157,7 +157,7 @@ export function OrgChart({ team }: { team?: string }) {
 
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [team]);
 
   const totalMembers = Object.values(areaMembers).flat().length;
 

@@ -96,6 +96,17 @@ export function Education({ user, teamName }: { user?: any; teamName?: string })
     return true;
   });
 
+  // Dynamically get available cells for the selected team
+  const availableCells = Array.from(new Set(
+    attendance
+      .filter(a => selectedTeam === '전체' || a.team === selectedTeam)
+      .map(a => a.cell)
+  )).sort((a, b) => {
+    const aNum = parseInt(a.replace(/[^0-9]/g, '')) || 0;
+    const bNum = parseInt(b.replace(/[^0-9]/g, '')) || 0;
+    return aNum - bNum || a.localeCompare(b);
+  });
+
   const toggleEducation = (id: string, field: keyof EducationAttendance['education']) => {
     setAttendance((prev: EducationAttendance[]) => prev.map((a: EducationAttendance) => 
       a.id === id ? { ...a, education: { ...a.education, [field]: !a.education[field] } } : a
@@ -155,7 +166,9 @@ export function Education({ user, teamName }: { user?: any; teamName?: string })
                   <div style={{ display: 'flex', gap: '12px' }}>
                     <select value={selectedCell} onChange={(e) => setSelectedCell(e.target.value)} style={{ padding: '8px 12px', borderRadius: '8px', border: '1px solid var(--outline-variant)' }}>
                       <option value="전체">모든 구역</option>
-                      {[1,2,3,4,5,6,7,8,9,10].map(c => <option key={c} value={`${c}구역`}>{c}구역</option>)}
+                      {availableCells.map(cell => (
+                        <option key={cell} value={cell}>{cell}</option>
+                      ))}
                     </select>
                     <div style={{ position: 'relative', width: '200px' }}>
                       <Search size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--secondary)' }} />

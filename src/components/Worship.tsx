@@ -46,6 +46,11 @@ export function Worship({ user, teamName }: { user?: any; teamName?: string }) {
     else if (roles.includes('team_ieum')) initialTeam = '이음팀';
   }
   const [selectedTeam, setSelectedTeam] = useState(initialTeam);
+  
+  // Update selectedTeam when teamName prop changes
+  useEffect(() => {
+    setSelectedTeam(teamName || initialTeam);
+  }, [teamName, initialTeam]);
 
   const [attendance, setAttendance] = useState<WorshipAttendance[]>(globalWorshipAttendance);
   // const [loading, setLoading] = useState(!worshipDataLoaded); // Removed unused state
@@ -102,6 +107,18 @@ export function Worship({ user, teamName }: { user?: any; teamName?: string }) {
     if (searchTerm && !a.name.includes(searchTerm) && !a.team.includes(searchTerm)) return false;
     
     return true;
+  });
+
+  // Dynamically get available cells for the selected team
+  const availableCells = Array.from(new Set(
+    attendance
+      .filter(a => selectedTeam === '전체' || a.team === selectedTeam)
+      .map(a => a.cell)
+  )).sort((a, b) => {
+    // Natural sort for "1구역", "2구역", etc.
+    const aNum = parseInt(a.replace(/[^0-9]/g, '')) || 0;
+    const bNum = parseInt(b.replace(/[^0-9]/g, '')) || 0;
+    return aNum - bNum || a.localeCompare(b);
   });
 
   const toggleRegular = (id: string, time: string) => {
@@ -167,7 +184,9 @@ export function Worship({ user, teamName }: { user?: any; teamName?: string }) {
                       style={{ padding: '8px 12px', borderRadius: 'var(--radius-md)', border: '1.5px solid var(--outline-variant)', fontSize: '14px', outline: 'none', background: 'white' }}
                     >
                       <option value="전체">모든 구역</option>
-                      {[1,2,3,4,5,6,7,8,9,10].map(c => <option key={c} value={`${c}구역`}>{c}구역</option>)}
+                      {availableCells.map(cell => (
+                        <option key={cell} value={cell}>{cell}</option>
+                      ))}
                     </select>
 
                     {/* Month Selector */}

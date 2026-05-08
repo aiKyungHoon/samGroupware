@@ -21,7 +21,7 @@ function App() {
 
   const renderContent = () => {
     const roles = user?.roles || [];
-    const isMaster = roles.includes('master') || user?.role === 'admin' || user?.id === 'admin' || roles.includes('menu_dashboard');
+    const isMaster = roles.includes('master') || user?.role === 'admin' || user?.id === 'admin' || roles.includes('menu_dashboard') || roles.includes('role_leader');
 
     switch (activeTab) {
       case 'dashboard':
@@ -46,11 +46,11 @@ function App() {
       case 'admin':
         return <AdminPanel />;
       case 'team_bora':
-        return <TeamManagement teamName="보라팀" user={user} />;
+        return <TeamManagement key="team_bora" teamName="보라팀" user={user} />;
       case 'team_haebom':
-        return <TeamManagement teamName="해봄팀" user={user} />;
+        return <TeamManagement key="team_haebom" teamName="해봄팀" user={user} />;
       case 'team_ieum':
-        return <TeamManagement teamName="이음팀" user={user} />;
+        return <TeamManagement key="team_ieum" teamName="이음팀" user={user} />;
       default:
         return <Dashboard onTabChange={setActiveTab} />;
     }
@@ -258,7 +258,7 @@ function App() {
             if (item.id === 'orgchart') return true;
             const roles = user?.roles || [];
             const isMaster = roles.includes('master') || user?.role === 'admin' || user?.id === 'admin';
-            if (item.id === 'dashboard') return roles.includes('menu_dashboard') || isMaster;
+            if (item.id === 'dashboard') return roles.includes('menu_dashboard') || roles.includes('role_leader') || isMaster;
             if (isMaster) return true;
             if (item.id === 'worship' && roles.includes('menu_worship')) return true;
             if (item.id === 'education' && roles.includes('menu_education')) return true;
